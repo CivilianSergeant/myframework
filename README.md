@@ -1,2 +1,2 @@
 # myframework
-Simple elegant framework for faster development
+Simple elegant PHP framework for faster Web development
