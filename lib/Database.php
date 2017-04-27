@@ -53,11 +53,16 @@ class Database {
         return $stmt->fetch();
     }
 
-    public static function all($take=null,$skip=null)
+    public static function all($take=null,$skip=null,$sortBy=null,$sortOrder=null)
     {
         
         $self = new static;
         static::$sqlCommand = "SELECT * FROM ".static::table;
+        
+        if(!empty($sortBy) && !empty($sortOrder)){
+            static::$sqlCommand .= " ORDER BY $sortBy $sortOrder";
+        }
+        
         if(!empty($take)){
             static::$sqlCommand .= " LIMIT ".$take;
         }
