@@ -169,19 +169,29 @@ class Response {
                 $layout->setData(self::$viewModel);
                 
                 if(!empty(self::$viewModel)){
+                    
                     foreach(self::$viewModel as $key=>$value){
                         $layout->{$key} =  $value; 
                     }
+                    $config = new Config();
+                    $layout->config = $config;
+                    self::$viewModel['config'] = $config;
                     extract(self::$viewModel);
                 }
 
                 include('views/'.self::$view.'.php');
                 $layout->setView(ob_get_clean());
-                self::$masterViewModel['layout'] = $layout;
-            }
-            
-            if(!empty(self::$masterViewModel)){
-                extract(self::$masterViewModel);
+                
+                if(!empty(self::$masterViewModel)){
+                    foreach(self::$masterViewModel as $key=>$value){
+                        $layout->{$key} =  $value; 
+                    }
+                    
+                    self::$masterViewModel['layout'] = $layout;
+                    extract(self::$masterViewModel);
+                }
+                
+                
             }
             
             if(!empty(self::$masterView)){
@@ -194,6 +204,10 @@ class Response {
         }else{
             
             if(!empty(self::$masterViewModel)){
+                foreach(self::$masterViewModel as $key=>$value){
+                    $layout->{$key} =  $value; 
+                }
+                self::$masterViewModel['config'] = new Config();
                 extract(self::$masterViewModel);
             }
             
