@@ -167,14 +167,15 @@ class Response {
                      
                 $layout = new Layout();
                 $layout->setData(self::$viewModel);
+                $config = new Config();
+                $layout->config = $config;
                 
-                if(!empty(self::$viewModel)){
-                    
-                    foreach(self::$viewModel as $key=>$value){
-                        $layout->{$key} =  $value; 
+                if(isset(self::$viewModel) && is_array(self::$viewModel)){
+                    if(!empty(self::$viewModel)){
+                        foreach(self::$viewModel as $key=>$value){
+                            $layout->{$key} =  $value; 
+                        }
                     }
-                    $config = new Config();
-                    $layout->config = $config;
                     self::$viewModel['config'] = $config;
                     extract(self::$viewModel);
                 }
@@ -182,9 +183,11 @@ class Response {
                 include('views/'.self::$view.'.php');
                 $layout->setView(ob_get_clean());
                 
-                if(!empty(self::$masterViewModel)){
-                    foreach(self::$masterViewModel as $key=>$value){
-                        $layout->{$key} =  $value; 
+                if(isset(self::$masterViewModel) && is_array(self::$masterViewModel)){
+                    if(!empty(self::$masterViewModel)){
+                        foreach(self::$masterViewModel as $key=>$value){
+                            $layout->{$key} =  $value; 
+                        }
                     }
                     
                     self::$masterViewModel['layout'] = $layout;
@@ -203,9 +206,11 @@ class Response {
             
         }else{
             
-            if(!empty(self::$masterViewModel)){
-                foreach(self::$masterViewModel as $key=>$value){
-                    $layout->{$key} =  $value; 
+            if(isset(self::$masterViewModel) && is_array(self::$masterViewModel)){
+                if(!empty(self::$masterViewModel)){
+                    foreach(self::$masterViewModel as $key=>$value){
+                        $layout->{$key} =  $value; 
+                    }
                 }
                 self::$masterViewModel['config'] = new Config();
                 extract(self::$masterViewModel);
