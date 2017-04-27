@@ -28,8 +28,12 @@ class Config {
         $config = include 'config/config.php';
         
         if(array_key_exists('base_url', $config)){
-            
-            return $config['base_url'] . $param;
+            if (!filter_var($param, FILTER_VALIDATE_URL, FILTER_FLAG_QUERY_REQUIRED) === false) {
+                return $config['base_url'] . $param;
+            }
+            else{
+                return $param;
+            }
         }
         return null;
     }
