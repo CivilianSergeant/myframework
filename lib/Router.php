@@ -109,6 +109,8 @@ class Router {
                     break;
             }
             
+        }else{
+            return new Request(self::$requestUri,self::$routes['default_route'], self::$routes['default_method'], null);
         }
     }
     
