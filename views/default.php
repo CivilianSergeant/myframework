@@ -4,6 +4,8 @@
     </head>
     <body>
         <h1><?php echo $name; ?></h1>
-        <?php echo $content; ?>
+        <?php $layout->renderSubView();
+            print_r($layout);
+        ?>
     </body>
 </html>

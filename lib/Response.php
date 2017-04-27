@@ -158,18 +158,26 @@ class Response {
         if(!empty(self::$view)){
             
             ob_start();
-            if(!empty(self::$viewModel)){
-                extract(self::$viewModel);
-            }
             
             if(!empty(self::$view)){
-                
+             
                 if(!file_exists('views/'.self::$view.'.php')){
                     throw new \Exception("Sub View not found",404);
                 }
+                     
+                $layout = new Layout();
+                $layout->setData(self::$viewModel);
                 
+                if(!empty(self::$viewModel)){
+                    foreach(self::$viewModel as $key=>$value){
+                        $layout->{$key} =  $value; 
+                    }
+                    extract(self::$viewModel);
+                }
+
                 include('views/'.self::$view.'.php');
-                self::$masterViewModel['content'] = ob_get_clean();
+                $layout->setView(ob_get_clean());
+                self::$masterViewModel['layout'] = $layout;
             }
             
             if(!empty(self::$masterViewModel)){
