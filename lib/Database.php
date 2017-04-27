@@ -87,11 +87,17 @@ class Database {
         return $stmt->fetchAll(\PDO::FETCH_CLASS,  get_class($self));
     }
     
-    public static function where($sqlCommand)
+    public static function Where($sqlCommand)
     {
         $self = new static;
         self::$where = $sqlCommand;
         return $self;
+    }
+    
+    public function where($sqlCommand)
+    {
+        self::$where = $sqlCommand;
+        return $this;
     }
     
     public static function select($select=null)
@@ -139,6 +145,7 @@ class Database {
     {
         self::$sortBy = $sortBy;
         self::$sortOrder = $sortOrder;
+        return $this;
     }
     
     public function __destruct() {
