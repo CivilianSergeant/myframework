@@ -35,7 +35,7 @@ class Database {
                 throw new \Exception("Check Database configuration at config.php",500);
             }
             
-            self::$conn = new \PDO("mysql:host=localhost;dbname=test","root","");
+            self::$conn = new \PDO("$driver:host=$host;dbname=$dbName",$user,$pass);
         }
     }
     
