@@ -23,6 +23,8 @@ class Database {
     protected static $sqlCommand;
     protected static $where;
     protected static $select;
+    protected static $sortBy;
+    protected static $sortOrder;
 
 
     private function __construct() 
@@ -123,10 +125,20 @@ class Database {
             static::$sqlCommand .= " WHERE ".self::$where;
         }
         
+        if(!empty(self::$sortBy) && !empty(self::$sortOrder)){
+            static::$sqlCommand .= " ORDER BY `".self::$sortBy."` ".self::$sortOrder;
+        }
+        
         $stmt = self::$conn->query(static::$sqlCommand);
         $stmt->execute();
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
         return $stmt->fetchAll();
+    }
+    
+    public function sort($sortBy,$sortOrder)
+    {
+        self::$sortBy = $sortBy;
+        self::$sortOrder = $sortOrder;
     }
     
     public function __destruct() {
