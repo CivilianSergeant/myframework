@@ -87,12 +87,12 @@ class Database {
         return $stmt->fetchAll(\PDO::FETCH_CLASS,  get_class($self));
     }
     
-    public static function Where($sqlCommand)
-    {
-        $self = new static;
-        self::$where = $sqlCommand;
-        return $self;
-    }
+//    public static function Where($sqlCommand)
+//    {
+//        $self = new static;
+//        self::$where = $sqlCommand;
+//        return $self;
+//    }
     
     public function where($sqlCommand)
     {
@@ -137,7 +137,7 @@ class Database {
         
         $stmt = self::$conn->query(static::$sqlCommand);
         $stmt->execute();
-        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        $stmt->setFetchMode(\PDO::FETCH_CLASS,  get_class($this));
         return $stmt->fetchAll();
     }
     
