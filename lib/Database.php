@@ -32,7 +32,7 @@ class Database {
             $pass   = $databaseConfig['pass'];
             $dbName = $databaseConfig['dbname']; 
             if(empty($databaseConfig) || empty($driver) || empty($host) || empty($user) || empty($dbName)){
-                throw new Exception("Check Database configuration at config.php",500);
+                throw new \Exception("Check Database configuration at config.php",500);
             }
             
             self::$conn = new \PDO("mysql:host=localhost;dbname=test","root","");

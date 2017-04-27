@@ -17,7 +17,7 @@ return [
         "host" => "",
         'user' => "",
         'pass' => "",
-        'dbnam'=> ""
+        'dbname'=> ""
     ]
 ];
         
