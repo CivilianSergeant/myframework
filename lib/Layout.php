@@ -29,8 +29,13 @@ class Layout {
         static::$data = $data;
     }
     
-    public function renderSubView(){
-        
+    public function renderSubView()
+    {
        echo self::$subView;
+    }
+    
+    public function add($key,$value)
+    {
+        $this->{$key} = $value;
     }
 }

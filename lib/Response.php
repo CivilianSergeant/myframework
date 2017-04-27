@@ -154,7 +154,8 @@ class Response {
             
     public function render()
     {
-        
+        $layout = new Layout();
+        \Bootstrap\Bootstrap::init($layout);
         if(!empty(self::$view)){
             
             ob_start();
@@ -165,7 +166,7 @@ class Response {
                     throw new \Exception("Sub View not found",404);
                 }
                      
-                $layout = new Layout();
+                
                 $layout->setData(self::$viewModel);
                 $config = new Config();
                 $layout->config = $config;
@@ -215,6 +216,8 @@ class Response {
                 self::$masterViewModel['config'] = new Config();
                 extract(self::$masterViewModel);
             }
+            
+            self::$masterViewModel['layout'] = $layout;
             
             if(!empty(self::$masterView)){
                 if(!file_exists('views/'.self::$masterView.'.php')){
