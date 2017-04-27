@@ -11,5 +11,13 @@ return [
     
     
     'special_chars' => '[^a-zA-Z0-9-_]',
+    
+    'database' => [
+        "driver"=>"mysql",
+        "host" => "",
+        'user' => "",
+        'pass' => "",
+        'dbnam'=> ""
+    ]
 ];
         
