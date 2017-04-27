@@ -60,7 +60,7 @@ class Database {
         static::$sqlCommand = "SELECT * FROM ".static::table;
         
         if(!empty($sortBy) && !empty($sortOrder)){
-            static::$sqlCommand .= " ORDER BY $sortBy $sortOrder";
+            static::$sqlCommand .= " ORDER BY `$sortBy` $sortOrder";
         }
         
         if(!empty($take)){
