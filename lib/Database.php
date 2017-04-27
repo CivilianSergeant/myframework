@@ -23,8 +23,9 @@ class Database {
     
     private function __construct() 
     {
-        self::$conn = new \PDO("mysql:host=localhost;dbname=test","root","");
-
+        if(empty(self::$conn)){
+            self::$conn = new \PDO("mysql:host=localhost;dbname=test","root","");
+        }
     }
     
     public static function find($id)
@@ -50,6 +51,14 @@ class Database {
         }
         
         $stmt = self::$conn->query(static::$sqlCommand);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_CLASS,  get_class($self));
+    }
+    
+    public static function query($sqlCommand)
+    {
+        $self = new static;
+        $stmt = self::$conn->query($sqlCommand);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_CLASS,  get_class($self));
     }
