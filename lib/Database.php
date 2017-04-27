@@ -15,12 +15,16 @@ namespace Lib;
  */
 class Database {
     
+    const table = null;
     protected static $conn;
     protected static $self;
     protected static $take;
     protected static $skip;
     protected static $sqlCommand;
-    
+    protected static $where;
+    protected static $select;
+
+
     private function __construct() 
     {
         if(empty(self::$conn)){
@@ -68,10 +72,56 @@ class Database {
     
     public static function query($sqlCommand)
     {
+        
         $self = new static;
-        $stmt = self::$conn->query($sqlCommand);
+        static::$sqlCommand = $sqlCommand;
+        $stmt = self::$conn->query(static::$sqlCommand);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_CLASS,  get_class($self));
+    }
+    
+    public static function where($sqlCommand)
+    {
+        $self = new static;
+        self::$where = $sqlCommand;
+        return $self;
+    }
+    
+    public static function select($select=null)
+    {
+        $self = new static;
+        self::$select = $select;
+        return $self;
+    }
+    
+    public function count()
+    {
+        static::$sqlCommand = "SELECT COUNT(*) as total FROM ".static::table;
+        if(self::$where){
+            static::$sqlCommand .= " WHERE ".self::$where;
+        }
+     
+        $stmt = self::$conn->query(static::$sqlCommand);
+        $stmt->execute();
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        return $stmt->fetch();
+    }
+    
+    public function get()
+    {
+        if(empty(self::$select)){
+            self::$select = "*";
+        }
+        static::$sqlCommand = "SELECT ".self::$select." FROM ".static::table;
+        
+        if(self::$where){
+            static::$sqlCommand .= " WHERE ".self::$where;
+        }
+        
+        $stmt = self::$conn->query(static::$sqlCommand);
+        $stmt->execute();
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        return $stmt->fetchAll();
     }
     
     public function __destruct() {

@@ -16,8 +16,14 @@ class Router {
     public function __construct() {
         
         self::$serverName = $_SERVER['SERVER_NAME'];
-        self::$requestUri =  explode("/",$_SERVER['PATH_INFO']);
-        self::$requestUri = array_slice(self::$requestUri, 1);
+        
+        if(isset($_SERVER['PATH_INFO'])){
+            self::$requestUri =  explode("/",$_SERVER['PATH_INFO']);
+            self::$requestUri = array_slice(self::$requestUri, 1);
+        }else{
+            self::$requestUri = null;
+        }
+        
         self::$routes = require 'config/routes.php';
     }
     
