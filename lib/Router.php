@@ -32,7 +32,7 @@ class Router {
                 case 1:
                    
                     if(empty(self::$requestUri[0])){
-                        return new Request(self::$routes['default_route'], self::$routes['default_method'], null);
+                        return new Request(self::$requestUri,self::$routes['default_route'], self::$routes['default_method'], null);
                     }
                     if(!array_key_exists('/'.self::$requestUri[0],self::$routes['routes'])){
                         throw new \Exception("Route not matched",500);
