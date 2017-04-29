@@ -201,6 +201,20 @@ class Database {
             throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
         }
     }
+    
+    public function first()
+    {
+        $this->prepareQuery();
+        self::$conn = Connection::getInstance();   
+        $stmt = self::$conn->query(static::$sqlCommand);
+        if(!empty($stmt)){
+            $stmt->execute();
+            $stmt->setFetchMode(\PDO::FETCH_CLASS,  get_class($this));
+            return $stmt->fetch();
+        }else{
+            throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
+        }
+    }
 
     public function __destruct() {
         self::$conn = null;
