@@ -11,6 +11,10 @@ class Connection {
     
     protected static $conn;
     
+    private function __construct() {
+        ;
+    }
+
     public static function getInstance() {
         
         if(empty(self::$conn)){

@@ -8,7 +8,7 @@ use Lib\Response;
  */
 interface BootstrapInterface {
  
-    public static function init(Response $layout);
+    public static function init(Response $response);
     
     
     

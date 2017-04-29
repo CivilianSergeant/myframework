@@ -29,7 +29,7 @@ class Database {
     const CLAUSE_WHERE = 'where';
     
 
-    private function __construct() 
+    public function __construct() 
     {
         self::$conn = Connection::getInstance();   
     }
@@ -43,10 +43,36 @@ class Database {
         $stmt->setFetchMode(\PDO::FETCH_CLASS,  get_class($self));
         return $stmt->fetch();
     }
+    
+    public function save()
+    {
+        
+        $columnNames  = [];
+        $columnValues = [];
+        
+        $fields = get_object_vars($this);
+        
+        foreach($fields as $field => $fieldVal){
+            if(property_exists($this, $field)){
+                if(isset($fieldVal)){
+                    $columnNames[]  = "`".$field."`";
+                    $columnValues[] = "'".$fieldVal."'";
+                }
+            }
+        }
+        self::$sqlCommand = "INSERT INTO ".static::table." (".implode(",",$columnNames).") VALUES (".implode(",",$columnValues).")";
+        
+        $stmt = self::$conn->query(static::$sqlCommand);
+        if(!empty($stmt)){
+            $stmt->execute();
+        }else{
+            throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
+        }
+        
+    }
 
     public static function all($take=null,$skip=null,$sortBy=null,$sortOrder=null)
     {
-        
         $self = new static;
         static::$sqlCommand = "SELECT * FROM ".static::table;
         
@@ -62,8 +88,13 @@ class Database {
         }
         
         $stmt = self::$conn->query(static::$sqlCommand);
-        $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_CLASS,  get_class($self));
+        
+        if(!empty($stmt)){
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_CLASS,  get_class($self));
+        }else{
+            throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
+        }
     }
     
     public static function query($sqlCommand)
@@ -72,8 +103,12 @@ class Database {
         $self = new static;
         static::$sqlCommand = $sqlCommand;
         $stmt = self::$conn->query(static::$sqlCommand);
-        $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_CLASS,  get_class($self));
+        if(!empty($stmt)){
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_CLASS,  get_class($self));
+        }else{
+            throw new \Exception("SQL ERROR: [".$this->lastQuery()."]"); 
+        }
     }
     
     public static function where($sqlCommand)
@@ -129,7 +164,9 @@ class Database {
             $having  = static::$where->getHaving();
         }
         
-        self::$sqlCommand .= " ".$where;
+        if(!empty($where)){
+            self::$sqlCommand .= " WHERE ".$where;
+        }
         
         if(!empty($groupBy)){
             static::$sqlCommand .= " GROUP BY ".implode(",",$groupBy);
