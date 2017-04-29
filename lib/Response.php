@@ -155,6 +155,12 @@ class Response {
         
         return null;
     }
+	
+	public function clearSession()
+    {
+        session_destroy();
+        return true;
+    }
     
     public function setLayoutData($key,$value)
     {
