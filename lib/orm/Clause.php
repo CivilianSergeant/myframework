@@ -139,4 +139,9 @@ class Clause {
         return $this->context->get();
     }
     
+    public function fisrt()
+    {
+        return $this->context->first();
+    }
+    
 }
