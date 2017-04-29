@@ -9,6 +9,7 @@ use Bootstrap\Bootstrap;
  */
 class Response {
     
+    protected $config;
     protected $controllerName;
     protected $getData;
     protected $headers;
@@ -26,6 +27,7 @@ class Response {
     
     public function __construct() {
         $this->layout = new Layout($this);
+        $this->config = new Config();
     }
     
     
@@ -152,11 +154,16 @@ class Response {
     {
         return $this->layout;
     }
+    
+    public function getConfig()
+    {
+        return $this->config;
+    }
 
             
     public function render()
     {
-        $config = new Config();
+        
         Bootstrap::init($this);
         
         if(!empty(self::$view)){
@@ -172,7 +179,7 @@ class Response {
                 
                 $this->layout->setData(self::$viewModel);
                 
-                $this->layout->config = $config;
+                $this->layout->config = $this->config;
                 
                 if(isset(self::$viewModel) && is_array(self::$viewModel)){
                     if(!empty(self::$viewModel)){
@@ -180,7 +187,7 @@ class Response {
                             $this->layout->add($key,$value); 
                         }
                     }
-                    self::$viewModel['config'] = $config;
+                    self::$viewModel['config'] = $this->config;
                     extract(self::$viewModel);
                 }
 
@@ -216,7 +223,7 @@ class Response {
                         $this->layout->add($key,$value); 
                     }
                 }
-                self::$masterViewModel['config'] = $config;
+                self::$masterViewModel['config'] = $this->config;
                 extract(self::$masterViewModel);
             }
             
