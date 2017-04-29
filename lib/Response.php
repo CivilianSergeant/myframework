@@ -50,6 +50,9 @@ class Response {
 
     public function getSessionData() 
     {
+        if(isset($_SESSION)){
+            $this->sessionData = $_SESSION;
+        }
         return $this->sessionData;
     }
 
@@ -85,9 +88,12 @@ class Response {
         $this->headers = $headers;
     }
 
-    public function setSessionData($sessionData)
+    public function setSessionData($key,$sessionData)
     {
         $this->sessionData = $sessionData;
+        if(isset($_SESSION)){
+            $_SESSION[$key] = $this->sessionData;
+        }
     }
 
     public function setPostData($postData)
@@ -138,8 +144,11 @@ class Response {
     
     public function getSession($name)
     {
-        if(array_key_exists($name, $this->sessionData)){
-            return $this->sessionData[$name];
+        if(isset($_SESSION)){
+            $this->sessionData = $_SESSION;
+            if(array_key_exists($name, $this->sessionData)){
+                return $this->sessionData[$name];
+            }
         }
         
         return null;
