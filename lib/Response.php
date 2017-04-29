@@ -147,7 +147,9 @@ class Response {
         if(isset($_SESSION)){
             $this->sessionData = $_SESSION;
             if(array_key_exists($name, $this->sessionData)){
-                return $this->sessionData[$name];
+                $session = (array)$this->sessionData[$name];
+                array_shift($session);
+                return $session;
             }
         }
         

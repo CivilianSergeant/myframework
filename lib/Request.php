@@ -46,7 +46,7 @@ class Request {
        $response->setHeaders(getallheaders());
        $response->setPostData($_POST);
        $response->setGetData($_GET);
-       $response->setSessionData($_SESSION);
+       $response->setSessionData('system',$_SESSION);
        $response->setControllerName(self::$controller);
        $response->setMethodName(self::$method);
        $response->setParam(self::$params);
