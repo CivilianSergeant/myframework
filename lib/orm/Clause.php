@@ -136,7 +136,7 @@ class Clause {
     
     public function get()
     {
-        $this->context->get();
+        return $this->context->get();
     }
     
 }

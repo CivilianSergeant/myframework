@@ -204,13 +204,7 @@ class Database {
         }
     }
     
-    public function sort($sortBy,$sortOrder)
-    {
-        self::$sortBy = $sortBy;
-        self::$sortOrder = $sortOrder;
-        return $this;
-    }
-    
+
     public function __destruct() {
         self::$conn = null;
     }
