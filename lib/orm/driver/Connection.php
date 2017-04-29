@@ -12,7 +12,7 @@ class Connection {
     protected static $conn;
     
     private function __construct() {
-        ;
+       // ;
     }
 
     public static function getInstance() {

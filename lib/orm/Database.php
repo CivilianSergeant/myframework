@@ -29,15 +29,11 @@ class Database {
     const CLAUSE_WHERE = 'where';
     
 
-    public function __construct() 
-    {
-        self::$conn = Connection::getInstance();   
-    }
-    
     public static function find($id)
     {
         $self = new static;
         static::$sqlCommand = "SELECT * FROM ".static::table." WHERE id=".$id;
+        self::$conn = Connection::getInstance();   
         $stmt = self::$conn->query(static::$sqlCommand);
         $stmt->execute();
         $stmt->setFetchMode(\PDO::FETCH_CLASS,  get_class($self));
@@ -61,7 +57,7 @@ class Database {
             }
         }
         self::$sqlCommand = "INSERT INTO ".static::table." (".implode(",",$columnNames).") VALUES (".implode(",",$columnValues).")";
-        
+        self::$conn = Connection::getInstance();   
         $stmt = self::$conn->query(static::$sqlCommand);
         if(!empty($stmt)){
             $stmt->execute();
@@ -86,7 +82,7 @@ class Database {
         if(isset($skip)){
             static::$sqlCommand .= " OFFSET ".$skip;
         }
-        
+        self::$conn = Connection::getInstance();   
         $stmt = self::$conn->query(static::$sqlCommand);
         
         if(!empty($stmt)){
@@ -102,6 +98,7 @@ class Database {
         
         $self = new static;
         static::$sqlCommand = $sqlCommand;
+        self::$conn = Connection::getInstance();   
         $stmt = self::$conn->query(static::$sqlCommand);
         if(!empty($stmt)){
             $stmt->execute();
@@ -136,7 +133,7 @@ class Database {
         if(self::$where){
             static::$sqlCommand .= " WHERE ".self::$where;
         }
-     
+        self::$conn = Connection::getInstance();   
         $stmt = self::$conn->query(static::$sqlCommand);
         $stmt->execute();
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
@@ -193,7 +190,8 @@ class Database {
     
     public function get()
     {
-        $this->prepareQuery();     
+        $this->prepareQuery();
+        self::$conn = Connection::getInstance();   
         $stmt = self::$conn->query(static::$sqlCommand);
         if(!empty($stmt)){
             $stmt->execute();
@@ -203,7 +201,6 @@ class Database {
             throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
         }
     }
-    
 
     public function __destruct() {
         self::$conn = null;
