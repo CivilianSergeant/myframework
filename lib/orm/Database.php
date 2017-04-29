@@ -1,13 +1,7 @@
 <?php
+namespace Lib\ORM;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-namespace Lib;
-
+use Lib\ORM\Driver\Connection;
 /**
  * Description of Database
  *
@@ -20,29 +14,24 @@ class Database {
     protected static $self;
     protected static $take;
     protected static $skip;
+    
     protected static $sqlCommand;
+    
     protected static $where;
     protected static $select;
     protected static $sortBy;
     protected static $sortOrder;
-
+    
+    
+    
+    const CLAUSE_FROM  = 'from';
+    const CLAUSE_SELECT = 'select';
+    const CLAUSE_WHERE = 'where';
+    
 
     private function __construct() 
     {
-        if(empty(self::$conn)){
-            
-            $databaseConfig = Config::get('database');
-            $host   = $databaseConfig['host'];
-            $driver = $databaseConfig['driver'];
-            $user   = $databaseConfig['user'];
-            $pass   = $databaseConfig['pass'];
-            $dbName = $databaseConfig['dbname']; 
-            if(empty($databaseConfig) || empty($driver) || empty($host) || empty($user) || empty($dbName)){
-                throw new \Exception("Check Database configuration at config.php",500);
-            }
-            
-            self::$conn = new \PDO("$driver:host=$host;dbname=$dbName",$user,$pass);
-        }
+        self::$conn = Connection::getInstance();   
     }
     
     public static function find($id)
@@ -87,24 +76,23 @@ class Database {
         return $stmt->fetchAll(\PDO::FETCH_CLASS,  get_class($self));
     }
     
-//    public static function Where($sqlCommand)
-//    {
-//        $self = new static;
-//        self::$where = $sqlCommand;
-//        return $self;
-//    }
-    
-    public function where($sqlCommand)
-    {
-        self::$where = $sqlCommand;
-        return $this;
-    }
-    
-    public static function select($select=null)
+    public static function where($sqlCommand)
     {
         $self = new static;
-        self::$select = $select;
-        return $self;
+        self::$where = new Clause($self,$sqlCommand,self::CLAUSE_WHERE);
+        return self::$where;
+    }
+    
+    
+    
+    public static function select($sqlCommand=null)
+    {
+        $self = new static;
+        if(empty($sqlCommand)){
+            $sqlCommand = "*";
+        }
+        self::$select = new Clause($self, $sqlCommand, self::CLAUSE_SELECT);
+        return self::$select;
     }
     
     public function count()
@@ -120,25 +108,63 @@ class Database {
         return $stmt->fetch();
     }
     
-    public function get()
+    protected function prepareQuery()
     {
         if(empty(self::$select)){
-            self::$select = "*";
+            $select = static::$select = " * ";
+            
+        }else{
+            $select  = static::$select->getSelectClause();
+            $where   = static::$select->getWhereClause();
+            $orderBy = static::$select->getOrderBy();
+            $groupBy = static::$select->getGroupBy();
+            $having  = static::$select->getHaving();
         }
-        static::$sqlCommand = "SELECT ".self::$select." FROM ".static::table;
+        static::$sqlCommand = "SELECT ".$select." FROM ".static::table;
         
-        if(self::$where){
-            static::$sqlCommand .= " WHERE ".self::$where;
+        if(!empty(self::$where)){
+            $where = static::$where->getWhereClause();
+            $orderBy = static::$where->getOrderBy();
+            $groupBy = static::$where->getGroupBy();
+            $having  = static::$where->getHaving();
         }
         
-        if(!empty(self::$sortBy) && !empty(self::$sortOrder)){
-            static::$sqlCommand .= " ORDER BY `".self::$sortBy."` ".self::$sortOrder;
+        self::$sqlCommand .= " ".$where;
+        
+        if(!empty($groupBy)){
+            static::$sqlCommand .= " GROUP BY ".implode(",",$groupBy);
         }
         
+        if(!empty($having)){
+            static::$sqlCommand .= " HAVING ".$having;
+        }
+        
+        if(!empty($orderBy)){
+            static::$sqlCommand .= " ORDER BY ".implode(",",$orderBy);
+        }
+        
+    }
+    
+    /**
+     * 
+     * @return string
+     */
+    public static function lastQuery()
+    {
+        return static::$sqlCommand;
+    }
+    
+    public function get()
+    {
+        $this->prepareQuery();     
         $stmt = self::$conn->query(static::$sqlCommand);
-        $stmt->execute();
-        $stmt->setFetchMode(\PDO::FETCH_CLASS,  get_class($this));
-        return $stmt->fetchAll();
+        if(!empty($stmt)){
+            $stmt->execute();
+            $stmt->setFetchMode(\PDO::FETCH_CLASS,  get_class($this));
+            return $stmt->fetchAll();
+        }else{
+            throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
+        }
     }
     
     public function sort($sortBy,$sortOrder)

@@ -1,13 +1,7 @@
 <?php
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 namespace Lib;
 
+use Bootstrap\Bootstrap;
 /**
  * Description of Response
  *
@@ -15,23 +9,23 @@ namespace Lib;
  */
 class Response {
     
-    protected static $view;
-    protected static $viewModel;
-    protected static $masterView;
-    protected static $masterViewModel;
-    
-    protected $headers;
-    protected $sessionData;
-    protected $postData;
-    protected $getData;
     protected $controllerName;
+    protected $getData;
+    protected $headers;
+    protected $layout;
     protected $methodName;
     protected $param;
+    protected $postData;
+    protected $sessionData;
     protected $segments;
     
+    protected static $masterView;
+    protected static $masterViewModel;
+    protected static $view;
+    protected static $viewModel;
+    
     public function __construct() {
-        
-        
+        $this->layout = new Layout($this);
     }
     
     
@@ -149,13 +143,22 @@ class Response {
         return null;
     }
     
+    public function setLayoutData($key,$value)
+    {
+        $this->layout->add($key,$value);
+    }
     
+    public function getLayout()
+    {
+        return $this->layout;
+    }
 
             
     public function render()
     {
-        $layout = new Layout();
-        \Bootstrap\Bootstrap::init($layout);
+        $config = new Config();
+        Bootstrap::init($this);
+        
         if(!empty(self::$view)){
             
             ob_start();
@@ -167,14 +170,14 @@ class Response {
                 }
                      
                 
-                $layout->setData(self::$viewModel);
-                $config = new Config();
-                $layout->config = $config;
+                $this->layout->setData(self::$viewModel);
+                
+                $this->layout->config = $config;
                 
                 if(isset(self::$viewModel) && is_array(self::$viewModel)){
                     if(!empty(self::$viewModel)){
                         foreach(self::$viewModel as $key=>$value){
-                            $layout->{$key} =  $value; 
+                            $this->layout->add($key,$value); 
                         }
                     }
                     self::$viewModel['config'] = $config;
@@ -182,16 +185,16 @@ class Response {
                 }
 
                 include('views/'.self::$view.'.php');
-                $layout->setView(ob_get_clean());
+                $this->layout->setView(ob_get_clean());
                 
                 if(isset(self::$masterViewModel) && is_array(self::$masterViewModel)){
                     if(!empty(self::$masterViewModel)){
                         foreach(self::$masterViewModel as $key=>$value){
-                            $layout->{$key} =  $value; 
+                            $this->layout->add($key,$value); 
                         }
                     }
                     
-                    self::$masterViewModel['layout'] = $layout;
+                    self::$masterViewModel['layout'] = $this->layout;
                     extract(self::$masterViewModel);
                 }
                 
@@ -210,14 +213,14 @@ class Response {
             if(isset(self::$masterViewModel) && is_array(self::$masterViewModel)){
                 if(!empty(self::$masterViewModel)){
                     foreach(self::$masterViewModel as $key=>$value){
-                        $layout->{$key} =  $value; 
+                        $this->layout->add($key,$value); 
                     }
                 }
-                self::$masterViewModel['config'] = new Config();
+                self::$masterViewModel['config'] = $config;
                 extract(self::$masterViewModel);
             }
             
-            self::$masterViewModel['layout'] = $layout;
+            self::$masterViewModel['layout'] = $this->layout;
             
             if(!empty(self::$masterView)){
                 if(!file_exists('views/'.self::$masterView.'.php')){

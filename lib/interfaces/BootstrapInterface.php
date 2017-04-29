@@ -1,6 +1,6 @@
 <?php
 namespace Lib\Interfaces;
-use Lib\Layout;
+use Lib\Response;
 /**
  * Description of BootstrapInterface
  *
@@ -8,7 +8,7 @@ use Lib\Layout;
  */
 interface BootstrapInterface {
  
-    public static function init(Layout &$layout);
+    public static function init(Response $layout);
     
     
     

@@ -5,7 +5,9 @@
     <body>
         <h1><?php echo $name; ?></h1>
         <?php $layout->renderSubView();
-            print_r($layout);
+            
         ?>
+        
+        <?php echo '<pre>'; print_r($layout);?>
     </body>
 </html>

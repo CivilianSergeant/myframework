@@ -1,7 +1,7 @@
 <?php
 namespace Bootstrap;
 use Lib\Interfaces\BootstrapInterface;
-use Lib\Layout;
+use Lib\Response;
 
 /**
  * Write all common code that should execute 
@@ -10,8 +10,8 @@ use Lib\Layout;
  */
 class Bootstrap implements BootstrapInterface{
    
-    public static function init(Layout &$layout) {
-        $layout->add('menu','value');
+    public static function init(Response $response) {
+        $response->setLayoutData('menu','value');
     }
 
 }

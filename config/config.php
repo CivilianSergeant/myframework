@@ -15,10 +15,10 @@ return [
     
     'database' => [
         "driver"=>"mysql",
-        "host" => "",
-        'user' => "",
+        "host" => "localhost",
+        'user' => "root",
         'pass' => "",
-        'dbname'=> ""
+        'dbname'=> "test"
     ]
 ];
         

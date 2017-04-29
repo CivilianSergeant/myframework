@@ -8,8 +8,8 @@ $loader = Loader::getLoader();
 
 $route  = Loader::getRouter(); 
 try{
-$route->getRequest()->dispatchRequest();
+    $route->getRequest()->dispatchRequest();
 }catch(\Exception $ex){
-    echo '<h1 style="color:red;">Error: '.$ex->getMessage().'</h1>';
+    echo '<h1 style="color:red;">ERROR: '.$ex->getMessage().'</h1>';
     die();
 }

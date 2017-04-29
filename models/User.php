@@ -13,7 +13,7 @@ namespace Models;
  *
  * @author Himel
  */
-class User extends \Lib\Database{
+class User extends \Lib\ORM\Database{
     
     const table = "users";
     
