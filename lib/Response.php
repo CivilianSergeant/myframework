@@ -26,6 +26,34 @@ class Response {
     }
     
     /**
+     * Get config object
+     * @return object
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+    
+    /**
+     * Get layout object
+     * @return object
+     */
+    public function getLayout()
+    {
+        return $this->layout;
+    }
+    
+    /**
+     * Bind data to layout object
+     * @param string $key
+     * @param mixed $value
+     */
+    public function setLayoutData($key,$value)
+    {
+        $this->layout->add($key,$value);
+    }
+    
+    /**
      * Set Master View and Data
      * @param type $view
      * @param type $data
@@ -46,52 +74,11 @@ class Response {
         self::$view = $view;
         self::$viewModel = $data;
     }
-    
-    public function isLoggedIn()
-    {
-        if(isset($_SESSION)){
-            $this->sessionData = $_SESSION;
-            if(!empty($this->sessionData)){
-                return true;
-            }
-            return false;
-        }
-        else{
-            return false;
-        }
 
-    }
-    
-    public function authorise(){
-        if($this->route == Config::get('default_login_route')){
-            if($this->isLoggedIn()){
-                $this->redirect('/');
-            }
-        }else{
-            if($this->isLoggedIn()){
-                $this->redirect(Config::get('default_login_route'));
-            }
-        }
-    }
-
-    
-
-    public function setLayoutData($key,$value)
-    {
-        $this->layout->add($key,$value);
-    }
-    
-    public function getLayout()
-    {
-        return $this->layout;
-    }
-    
-    public function getConfig()
-    {
-        return $this->config;
-    }
-
-            
+    /**
+     * Render view
+     * @throws \Exception
+     */        
     public function render()
     {
         

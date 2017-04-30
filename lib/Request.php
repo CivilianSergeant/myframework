@@ -32,19 +32,37 @@ class Request {
    }
    
    /**
+    * Authorize user accounts and accessibility
+    */
+   public function authorise(){
+        if(self::$route == Config::get('default_login_route')){
+            if($this->isLoggedIn()){
+                $this->redirect('/');
+            }
+        }else{
+            if($this->isLoggedIn()){
+                $this->redirect(Config::get('default_login_route'));
+            }
+        }
+    }
+   
+   /**
+     * Clear all session data
+     * @return boolean
+     */
+    public function clearSession()
+    {
+        session_destroy();
+        return true;
+    }
+   
+   /**
     * This mehtod should not call directly
     * @throws \Exception
     */
    public function dispatchRequest()
    {
        $response = new Response(self::$route);
-//       $response->setPostData($_POST);
-//       $response->setGetData($_GET);
-//       $response->setSessionData('system',$_SESSION);
-//       $response->setControllerName(self::$controller);
-//       $response->setMethodName(self::$method);
-//       $response->setParam(self::$params);
-//       $response->setSegments(self::$segments);
        
        $controller = new self::$controller($this);
        
@@ -56,21 +74,52 @@ class Request {
            throw new \Exception("No Page Found, Does the method exist in the controller?",404);
        }
        
-       $response = call_user_func(array($controller,self::$method), $this,$response);
+       $res = call_user_func(array($controller,self::$method), $this,$response);
        
-       if(empty($response)){
+       if(empty($res)){
            exit(0);
        }
        
-       if($response instanceof \Lib\Response){
-           $response->render();
+       if($res instanceof \Lib\Response){
+           $res->render();
        }else{
            throw new \Exception("Method did not return \Lib\Response Object",404);
        }
    }
    
    /**
-     * Get All Header Information of Request
+    * Get specific param value of get request
+    * @param string $name
+    * @return mixed
+    */
+   public function get($name)
+    {
+        if(array_key_exists($name, $_GET)){
+            return $_GET[$name];
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Get controller name
+     * @return string
+     */
+    public function getControllerName() {
+        return self::$controller;
+    }
+   
+   /**
+     * Get All data of get request params
+     * @return array
+     */
+    public function getData()
+    {
+        return $_GET;
+    }
+   
+   /**
+     * Get all header information of request
      * @return array
      */
     public function getHeaders() 
@@ -78,37 +127,27 @@ class Request {
         return getallheaders();
     }
     
-    public function getSessionData() 
-    {
-        if(isset($_SESSION)){
-            $this->sessionData = $_SESSION;
-        }
-        return $this->sessionData;
-    }
-
-    public function getPostData() 
-    {
-        return $_POST;
-    }
-
-    public function getData()
-    {
-        return $_GET;
+    /**
+     * Get method name
+     * @return string
+     */
+    public function getMethodName() {
+        return self::$method;
     }
     
-    public function redirect($route)
-    {
-        header("Location: " . $this->config->getBaseUrl("$route"));
-        exit();
-    }
-
-
-    public function clearSession()
-    {
-        session_destroy();
-        return true;
+    /**
+     * Get all url params
+     * @return string
+     */
+    public function getParam() {
+        return self::$params;
     }
     
+    /**
+     * Get specific param value of post request
+     * @param string $name
+     * @return mixed
+     */
     public function getPost($name)
     {
         
@@ -119,39 +158,28 @@ class Request {
         return null;
     }
     
-    public function get($name)
+    /**
+     * Get all post request data
+     * @return array
+     */
+    public function getPostData() 
     {
-        if(array_key_exists($name, $_GET)){
-            return $_GET[$name];
-        }
-        
-        return null;
+        return $_POST;
     }
     
-    public function getControllerName() {
-        return self::$controller;
-    }
-
-    public function getMethodName() {
-        return self::$method;
-    }
-
-    public function getParam() {
-        return self::$params;
-    }
-    
+    /**
+     * Get all url segments
+     * @return type
+     */
     public function getSegments() {
         return self::$segments;
     }
     
-    public function setSessionData($key,$sessionData)
-    {
-        $this->sessionData = $sessionData;
-        if(isset($_SESSION)){
-            $_SESSION[$key] = $this->sessionData;
-        }
-    }
-    
+    /**
+     * Get session data of specific assoc index
+     * @param string $name
+     * @return mixed
+     */
     public function getSession($name)
     {
         if(isset($_SESSION)){
@@ -165,6 +193,62 @@ class Request {
         
         return null;
     }
+    
+    /**
+     * Get All Session Data
+     * @return array
+     */
+    public function getSessionData() 
+    {
+        if(isset($_SESSION)){
+            $this->sessionData = $_SESSION;
+        }
+        return $this->sessionData;
+    }
+    
+    /**
+     * Check is user session exist
+     * @return boolean
+     */
+    public function isLoggedIn()
+    {
+        if(isset($_SESSION)){ 
+            if(!empty($_SESSION)){
+                return true;
+            }
+            return false;
+        }
+        else{
+            return false;
+        }
+
+    }
+
+    /**
+     * Redirect to given route
+     * @param string $route
+     */
+    public function redirect($route)
+    {
+        header("Location: " . $this->config->getBaseUrl("$route"));
+        exit();
+    }
+
+    /**
+     * Set session data
+     * @param string $key
+     * @param mixed $sessionData
+     */
+    public function setSessionData($key,$sessionData)
+    {
+        $this->sessionData = $sessionData;
+        if(isset($_SESSION)){
+            $_SESSION[$key] = $this->sessionData;
+            return true;
+        }
+    }
+    
+    
    
    
 }
