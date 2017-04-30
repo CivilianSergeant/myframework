@@ -10,158 +10,72 @@ use Bootstrap\Bootstrap;
 class Response {
     
     protected $config;
-    protected $controllerName;
-    protected $getData;
-    protected $headers;
     protected $layout;
-    protected $methodName;
-    protected $param;
-    protected $postData;
-    protected $sessionData;
-    protected $segments;
+    protected $route;
+
     
     protected static $masterView;
     protected static $masterViewModel;
     protected static $view;
     protected static $viewModel;
     
-    public function __construct() {
+    public function __construct($route) {
         $this->layout = new Layout($this);
         $this->config = new Config();
+        $this->route  = $route;
     }
     
-    
+    /**
+     * Set Master View and Data
+     * @param type $view
+     * @param type $data
+     */
     public function setMasterView($view,$data)
     {
         self::$masterView = $view;
         self::$masterViewModel = $data;
     }
     
+    /**
+     * Set Sub View of a Master View and Data for Sub View
+     * @param type $view
+     * @param type $data
+     */
     public function setSubView($view,$data)
     {
         self::$view = $view;
         self::$viewModel = $data;
     }
     
-    public function getHeaders() 
-    {
-        return $this->headers;
-    }
-
-    public function getSessionData() 
+    public function isLoggedIn()
     {
         if(isset($_SESSION)){
             $this->sessionData = $_SESSION;
+            if(!empty($this->sessionData)){
+                return true;
+            }
+            return false;
         }
-        return $this->sessionData;
-    }
-
-    public function getPostData() 
-    {
-        return $this->postData;
-    }
-
-    public function getGetData()
-    {
-        return $this->getData;
-    }
-    
-    public function getControllerName() {
-        return $this->controllerName;
-    }
-
-    public function getMethodName() {
-        return $this->methodName;
-    }
-
-    public function getParam() {
-        return $this->param;
-    }
-    
-    public function getSegments() {
-        return $this->segments;
-    }
-
-    
-    public function setHeaders($headers)
-    {
-        $this->headers = $headers;
-    }
-
-    public function setSessionData($key,$sessionData)
-    {
-        $this->sessionData = $sessionData;
-        if(isset($_SESSION)){
-            $_SESSION[$key] = $this->sessionData;
+        else{
+            return false;
         }
-    }
 
-    public function setPostData($postData)
-    {
-        $this->postData = $postData;
-    }
-
-    public function setGetData($getData)
-    {
-        $this->getData = $getData;
     }
     
-    
-    public function setControllerName($controllerName) {
-        $this->controllerName = $controllerName;
-    }
-    
-    public function setMethodName($methodName) {
-        $this->methodName = $methodName;
-    }
-
-    public function setParam($param) {
-        $this->param = $param;
-    }
-    
-    public function setSegments($segments) {
-        $this->segments = $segments;
-    }
- 
-    public function getPost($name)
-    {
-        
-        if(array_key_exists($name, $this->postData)){
-            return $this->postData[$name];
-        }
-        
-        return null;
-    }
-    
-    public function get($name)
-    {
-        if(array_key_exists($name, $this->getData)){
-            return $this->getData[$name];
-        }
-        
-        return null;
-    }
-    
-    public function getSession($name)
-    {
-        if(isset($_SESSION)){
-            $this->sessionData = $_SESSION;
-            if(array_key_exists($name, $this->sessionData)){
-                $session = (array)$this->sessionData[$name];
-                array_shift($session);
-                return $session;
+    public function authorise(){
+        if($this->route == Config::get('default_login_route')){
+            if($this->isLoggedIn()){
+                $this->redirect('/');
+            }
+        }else{
+            if($this->isLoggedIn()){
+                $this->redirect(Config::get('default_login_route'));
             }
         }
-        
-        return null;
     }
-	
-    public function clearSession()
-    {
-        session_destroy();
-        return true;
-    }
+
     
+
     public function setLayoutData($key,$value)
     {
         $this->layout->add($key,$value);

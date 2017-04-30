@@ -16,12 +16,29 @@ namespace Lib;
 class Config {
     
     public static function get($name){
-        $config = include 'config/config.php';
-        if(array_key_exists($name, $config)){
-            return $config[$name];
+        $configs = [];
+        if ($handle = opendir('config')) {
+            
+            /* This is the correct way to loop over the directory. */
+            while (false !== ($entry = readdir($handle))) {
+              if(in_array($entry,[' ','.','..'])){
+                  continue;
+              }
+              $config = include "config/$entry";
+              foreach($config as $key=>$c){
+                  $configs[$key]= $c;
+              }
+            }
+            closedir($handle);
+        }
+
+        if(array_key_exists($name, $configs)){
+            return $configs[$name];
         }
         return null;
     }
+    
+    
  
     public function getBaseUrl($param = null)
     {

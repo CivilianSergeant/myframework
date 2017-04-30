@@ -38,22 +38,26 @@ class Router {
                 case 1:
                    
                     if(empty(self::$requestUri[0])){
-                        return new Request(self::$requestUri,self::$routes['default_route'], self::$routes['default_method'], null);
+                        return new Request(self::$requestUri,"",self::$routes['default_route'], self::$routes['default_method'], null);
                     }
                     if(!array_key_exists('/'.self::$requestUri[0],self::$routes['routes'])){
                         throw new \Exception("Route not matched",500);
                     }
-                    $route = self::$routes['routes']['/'.self::$requestUri[0]];
+                    $routePattern = '/'.self::$requestUri[0]; 
+                    $route = self::$routes['routes'][$routePattern];
                     
-                    return new Request(self::$requestUri,$route['default_route'], $route['default_method'], null);
+                    return new Request(self::$requestUri,$routePattern,$route['default_route'], $route['default_method'], null);
                     
                 case 2:
-                    if(!array_key_exists('/'.self::$requestUri[0].'/'.self::$requestUri[1],self::$routes['routes'])){
+                    $routePattern = '/'.self::$requestUri[0].'/'.self::$requestUri[1];
+                    if(!array_key_exists($routePattern,self::$routes['routes'])){
                         throw new \Exception("Route not matched",500);
                     }
-                    $route = self::$routes['routes']['/'.self::$requestUri[0].'/'.self::$requestUri[1]];
                     
-                    return new Request(self::$requestUri,$route['default_route'],$route['default_method'], null);
+                    
+                    $route = self::$routes['routes'][$routePattern];
+                    
+                    return new Request(self::$requestUri,$routePattern,$route['default_route'],$route['default_method'], null);
                     
                 case 3:
                     
@@ -71,7 +75,7 @@ class Router {
                         }
                         
                         $route = self::$routes['routes'][$key];
-                        return new Request(self::$requestUri,$route['default_route'],$route['default_method'], $param);
+                        return new Request(self::$requestUri,$key,$route['default_route'],$route['default_method'], $param);
                         
                     }else if(is_string($param)){
                         $key = '/'.self::$requestUri[0].'/'.self::$requestUri[1].'/:any';
@@ -81,7 +85,7 @@ class Router {
                         }
                         
                         $route = self::$routes['routes'][$key];
-                        return new Request(self::$requestUri,$route['default_route'],$route['default_method'], $param);
+                        return new Request(self::$requestUri,$key,$route['default_route'],$route['default_method'], $param);
                         
                     }else{
                         throw new \Exception("Route not matched",500);
@@ -110,13 +114,13 @@ class Router {
                         }
                         
                         $route = self::$routes['routes'][$key];
-                        return new Request(self::$requestUri,$route['default_route'],$route['default_method'], $params);
+                        return new Request(self::$requestUri,$key,$route['default_route'],$route['default_method'], $params);
                         
                     break;
             }
             
         }else{
-            return new Request(self::$requestUri,self::$routes['default_route'], self::$routes['default_method'], null);
+            return new Request(self::$requestUri,"",self::$routes['default_route'], self::$routes['default_method'], null);
         }
     }
     
