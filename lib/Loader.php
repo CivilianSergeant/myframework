@@ -33,8 +33,15 @@ class Loader {
     
     private function _loadClasses($className)
     {
-        if(file_exists($className.'.php')){
-            include $className.'.php';
+	$classNameSegments = explode("\\",$className);
+	$i = count($classNameSegments);
+	$className = $classNameSegments[$i-1];
+	unset($classNameSegments[$i-1]);	
+	$namespace = strtolower(implode("/",$classNameSegments));
+	$file = $namespace.DIRECTORY_SEPARATOR.$className.'.php';
+        if(file_exists($file)){
+	      
+	    include $file;
         }
         
     }
