@@ -96,7 +96,6 @@ class Response {
                      
                 
                 $this->layout->setData(self::$viewModel);
-                
                 $this->layout->config = $this->config;
                 
                 if(isset(self::$viewModel) && is_array(self::$viewModel)){
@@ -106,6 +105,7 @@ class Response {
                         }
                     }
                     self::$viewModel['config'] = $this->config;
+                    self::$viewModel['layout'] = $this->layout;
                     extract(self::$viewModel);
                 }
 
@@ -118,7 +118,7 @@ class Response {
                             $this->layout->add($key,$value); 
                         }
                     }
-                    
+                    self::$masterViewModel['config'] = $this->config;
                     self::$masterViewModel['layout'] = $this->layout;
                     extract(self::$masterViewModel);
                 }
@@ -142,10 +142,11 @@ class Response {
                     }
                 }
                 self::$masterViewModel['config'] = $this->config;
+                self::$masterViewModel['layout'] = $this->layout;
                 extract(self::$masterViewModel);
             }
             
-            self::$masterViewModel['layout'] = $this->layout;
+            
             
             if(!empty(self::$masterView)){
                 if(!file_exists('views/'.self::$masterView.'.php')){
