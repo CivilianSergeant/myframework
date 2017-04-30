@@ -155,13 +155,44 @@ class Response {
         
         return null;
     }
-	
-	public function clearSession()
+    
+    public function isLoggedIn()
+    {
+        if(isset($_SESSION)){
+            $this->sessionData = $_SESSION;
+            if(!empty($this->sessionData)){
+                return true;
+            }
+            return false;
+        }
+        else{
+            return false;
+        }
+
+    }
+    
+    public function authorise(){
+        
+        if($this->isLoggedIn()){
+            $this->redirect('dashboard');
+        }
+        else{
+            $this->redirect('admin-login');
+        }
+    }
+
+        public function redirect($route)
+    {
+        header("Location: " . $this->config->getBaseUrl("$route"));
+        exit();
+    }
+
+    public function clearSession()
     {
         session_destroy();
         return true;
     }
-    
+
     public function setLayoutData($key,$value)
     {
         $this->layout->add($key,$value);
