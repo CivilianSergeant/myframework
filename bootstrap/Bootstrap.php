@@ -11,7 +11,7 @@ use Lib\Request;
  */
 class Bootstrap implements BootstrapInterface{
    
-    public static function init(Lib\Request $req,Response $res) {
+    public static function init(Request $req,Response $res) {
         $res->setLayoutData('menu','value');
     }
 

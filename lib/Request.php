@@ -62,7 +62,7 @@ class Request {
     */
    public function dispatchRequest()
    {
-       $response = new Response(self::$route);
+       $response = new Response($this);
        
        $controller = new self::$controller($this);
        
