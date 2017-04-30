@@ -22,6 +22,7 @@ class Request {
    protected $controllerName;
    protected $getData;
    protected $sessionData;
+   protected $config;
 
    public function __construct($segments,$route,$controller,$method,$params) {
        self::$segments = $segments;
@@ -29,6 +30,7 @@ class Request {
        self::$controller = "Controllers\\".$controller;
        self::$method     = $method;
        self::$params     = (empty($params))? [] : (is_array($params)? $params : array($params)); 
+       $this->config = new Config();
    }
    
    /**
@@ -99,6 +101,11 @@ class Request {
         }
         
         return null;
+    }
+    
+    public function getConfig()
+    {
+        return $this->config;
     }
     
     /**
