@@ -3,17 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/xampp/htdocs/m2m-website/lib/Request.php</file>
-            <file>file:/C:/xampp/htdocs/m2m-website/views/index/home.php</file>
-            <file>file:/C:/xampp/htdocs/m2m-website/lib/Loader.php</file>
-            <file>file:/C:/xampp/htdocs/m2m-website/config/routes.php</file>
-            <file>file:/C:/xampp/htdocs/m2m-website/views/default.php</file>
-            <file>file:/C:/xampp/htdocs/m2m-website/controllers/DefaultController.php</file>
-            <file>file:/C:/xampp/htdocs/m2m-website/lib/Router.php</file>
-            <file>file:/C:/xampp/htdocs/m2m-website/controllers/ServiceController.php</file>
-            <file>file:/C:/xampp/htdocs/m2m-website/lib/Response.php</file>
-            <file>file:/C:/xampp/htdocs/m2m-website/index.php</file>
-            <file>file:/C:/xampp/htdocs/m2m-website/lib/Database.php</file>
+            <file>file:/C:/xampp/htdocs/myframework/lib/Request.php</file>
+            <file>file:/C:/xampp/htdocs/myframework/lib/orm/Database.php</file>
+            <file>file:/C:/xampp/htdocs/myframework/lib/orm/Clause.php</file>
+            <file>file:/C:/xampp/htdocs/myframework/lib/Response.php</file>
         </group>
     </open-files>
 </project-private>

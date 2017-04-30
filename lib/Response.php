@@ -156,7 +156,7 @@ class Response {
         return null;
     }
 	
-	public function clearSession()
+    public function clearSession()
     {
         session_destroy();
         return true;
