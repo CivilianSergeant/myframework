@@ -36,12 +36,8 @@ class Request {
    /**
     * Authorize user accounts and accessibility
     */
-   public function authorise(){
-        if(self::$route == Config::get('default_login_route')){
-            if($this->isLoggedIn()){
-                $this->redirect('/');
-            }
-        }else{
+   public function authorize(){
+        if(self::$route != Config::get('default_login_route')){
             if($this->isLoggedIn()){
                 $this->redirect(Config::get('default_login_route'));
             }
