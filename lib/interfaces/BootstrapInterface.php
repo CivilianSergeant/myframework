@@ -1,6 +1,7 @@
 <?php
 namespace Lib\Interfaces;
 use Lib\Response;
+use Lib\Request;
 /**
  * Description of BootstrapInterface
  *
@@ -8,7 +9,7 @@ use Lib\Response;
  */
 interface BootstrapInterface {
  
-    public static function init(Response $response);
+    public static function init(Request $req,Response $res);
     
     
     

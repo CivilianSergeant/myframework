@@ -2,6 +2,7 @@
 namespace Bootstrap;
 use Lib\Interfaces\BootstrapInterface;
 use Lib\Response;
+use Lib\Request;
 
 /**
  * Write all common code that should execute 
@@ -10,8 +11,8 @@ use Lib\Response;
  */
 class Bootstrap implements BootstrapInterface{
    
-    public static function init(Response $response) {
-        $response->setLayoutData('menu','value');
+    public static function init(Lib\Request $req,Response $res) {
+        $res->setLayoutData('menu','value');
     }
 
 }

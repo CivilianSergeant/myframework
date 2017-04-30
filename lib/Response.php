@@ -11,7 +11,7 @@ class Response {
     
     protected $config;
     protected $layout;
-    protected $route;
+    protected $request;
 
     
     protected static $masterView;
@@ -19,10 +19,10 @@ class Response {
     protected static $view;
     protected static $viewModel;
     
-    public function __construct($route) {
+    public function __construct(Request $req) {
         $this->layout = new Layout($this);
         $this->config = new Config();
-        $this->route  = $route;
+        $this->request  = $req;
     }
     
     /**
@@ -82,7 +82,7 @@ class Response {
     public function render()
     {
         
-        Bootstrap::init($this);
+        Bootstrap::init($this->request,$this);
         
         if(!empty(self::$view)){
             
