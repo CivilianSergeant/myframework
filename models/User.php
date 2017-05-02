@@ -15,7 +15,7 @@ namespace Models;
  */
 class User extends \Lib\ORM\Database{
     
-    const table = "CRM_TICKET";
+    const table = "menus";
     
     protected $id;
     protected $name;
@@ -38,7 +38,7 @@ class User extends \Lib\ORM\Database{
     
     function Pages()
     {
-        return $this->hasMany("\Models\Page", "id", "menu_id");
+        return $this->hasMany("\Models\Page", "id", "menu_id")->where("is_published = 1");
     }
 
 

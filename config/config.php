@@ -12,7 +12,7 @@ return [
     'base_url' => 'http://localhost/myframework/',
 
     'special_chars' => '[^a-zA-Z0-9-_]',
-    'default_driver' => 'oracle',
+    'default_driver' => 'mysql',
     'database' => [
         'mysql' => [
             "driver"=>"mysql",

@@ -19,6 +19,7 @@ class Relation {
     protected $context;
     protected $foreignKey;
     protected $primaryKey;
+    protected $where;
     
     
     public function __construct($context) {
@@ -36,9 +37,9 @@ class Relation {
     public function get()
     {
         $caller = new $this->class();
-        $caller->getWhere()->select("*")->where($this->foreignKey."=".$this->context->getId());
+        $caller->getWhere()->select("*")->where($this->foreignKey."=".$this->context->getId())
+                ->where($this->where);
         return $caller->get();
-        
     }
     
     function setClass($class) {
@@ -59,7 +60,21 @@ class Relation {
     
     public function where($sqlCommand)
     {
-        $this->context->getWhere()->where($sqlCommand);
+        if(!empty($this->where)){
+            if(is_callable($sqlCommand)){
+                $this->where .= " AND (";
+                $this->where .= $sqlCommand($this);
+                $this->where .= ")";
+            }else{
+                if(substr($this->where,-1) === "("){
+                    $this->where .= "$sqlCommand";
+                }else{
+                    $this->where .= " AND $sqlCommand";
+                }
+            }
+        }else{
+            $this->where = " $sqlCommand";
+        }
         return $this;
     }
 }
