@@ -120,6 +120,15 @@ class Request {
     {
         return $_GET;
     }
+    
+    /**
+     * Get All 
+     * @return type
+     */
+    public function getFile()
+    {
+        return $_FILES;
+    }
    
    /**
      * Get all header information of request

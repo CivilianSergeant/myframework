@@ -1,6 +1,7 @@
 <?php
 namespace Controllers;
 use Lib\Response;
+use Lib\Request;
 use Lib\ORM\Database;
 /**
  * Description of DefaultController
@@ -14,8 +15,9 @@ class DefaultController {
         
     }
     
-    public function index(Response $response){
-        
+    public function index(Request $req,Response $response){
+        echo '<pre>';
+        $user = \Models\User::select()->first();
         
         
         //$response = new Response("default",['name'=>'Himel']);

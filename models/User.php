@@ -15,7 +15,7 @@ namespace Models;
  */
 class User extends \Lib\ORM\Database{
     
-    const table = "users";
+    const table = "menus";
     
     protected $id;
     protected $name;
@@ -34,6 +34,11 @@ class User extends \Lib\ORM\Database{
 
     function setName($name) {
         $this->name = $name;
+    }
+    
+    function Pages()
+    {
+        return $this->hasMany("\Models\Page", "id", "menu_id");
     }
 
 

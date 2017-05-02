@@ -18,7 +18,7 @@ return [
         "host" => "localhost",
         'user' => "root",
         'pass' => "",
-        'dbname'=> "test"
+        'dbname'=> "m2m_website"
     ]
 ];
         

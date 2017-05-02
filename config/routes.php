@@ -1,15 +1,17 @@
 <?php
 return [
-  'default_route' => 'DefaultController',
-  'default_method' => 'index',
+    'default_route' => 'DefaultController',
+    'default_method' => 'index',
     
-   'routes' => [
+    'default_login_route' =>'/login',  
+   
+    'routes' => [
         
-       '/services' => [
+       '/login' => [
            'default_route'  => 'ServiceController',
            'default_method' => 'index'
        ],
-       '/services/about/:any' => [
+       '/dashboard' => [
            'default_route'  => 'ServiceController',
            'default_method' => 'about'
        ],

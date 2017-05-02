@@ -28,6 +28,13 @@ class Database {
     const CLAUSE_SELECT = 'select';
     const CLAUSE_WHERE = 'where';
     
+    public function __get($name) {
+        
+        if(method_exists($this, $name)){
+            $this->$name()->get();
+        }
+    }
+    
 
     public static function find($id)
     {
@@ -214,6 +221,21 @@ class Database {
         }else{
             throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
         }
+    }
+    
+    public function hasMany($className,$primaryKey,$foreignKey)
+    {
+        $relation = new Relation($this);
+        $relation->setClass($className);
+        $relation->setPrimaryKey($primaryKey);
+        $relation->setForeignKey($foreignKey);
+        return $relation;
+    }
+    
+    public function getWhere()
+    {
+        self::$where = new Clause($this,null,self::CLAUSE_WHERE);
+        return self::$where;
     }
 
     public function __destruct() {

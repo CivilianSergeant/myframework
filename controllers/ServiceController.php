@@ -16,9 +16,14 @@ use Models\User;
  */
 class ServiceController {
     
+    public function __construct(Response $response) {
+        $response->authorise();
+    }
+
     public function index(Response $response)
     {
-        print_r($response->getSegments());
+        
+        //print_r($response->getSegments());
        // return new \Lib\Response('default',['name'=>'Hello','content'=>'']);
     }
     
