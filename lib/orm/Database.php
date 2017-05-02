@@ -234,6 +234,7 @@ class Database {
     
     public function getWhere()
     {
+        self::$select = null;
         self::$where = new Clause($this,null,self::CLAUSE_WHERE);
         return self::$where;
     }

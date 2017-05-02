@@ -105,6 +105,7 @@ class Clause {
     public function having($having)
     {
         $this->having = $having;
+        return $this;
     }
     
     public function getHaving()
@@ -144,4 +145,9 @@ class Clause {
         return $this->context->first();
     }
     
+    public function select($sqlCommand)
+    {
+        $this->select = $sqlCommand;
+        return $this;
+    }
 }
