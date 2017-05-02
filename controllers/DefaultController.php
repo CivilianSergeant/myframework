@@ -17,8 +17,8 @@ class DefaultController {
     
     public function index(Request $req,Response $response){
         echo '<pre>';
-        $user = \Models\User::select("id, menu_name")->first();
-        $user->Pages;
+        $user = \Models\User::select("*")->first();
+      //  $user->Pages;
         print_r($user);
         //$response = new Response("default",['name'=>'Himel']);
         $response->setMasterView('default', ['name'=>"Himel"]);

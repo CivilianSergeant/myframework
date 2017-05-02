@@ -15,7 +15,7 @@ namespace Models;
  */
 class User extends \Lib\ORM\Database{
     
-    const table = "menus";
+    const table = "CRM_TICKET";
     
     protected $id;
     protected $name;

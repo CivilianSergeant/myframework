@@ -10,7 +10,10 @@ use Lib\Config;
 class Connection {
     
     protected static $conn;
-    
+    const PLATFORM_DRIVER_ORACLE = "oci";
+    const PLATFORM_DRIVER_MYSQL  = "mysql";
+
+
     private function __construct() {
        // ;
     }
@@ -19,16 +22,27 @@ class Connection {
         
         if(empty(self::$conn)){
             $databaseConfig = Config::get('database');
-            $host   = $databaseConfig['host'];
+            $databaseConfig = $databaseConfig[Config::get('default_driver')];
+            $host   = (isset($databaseConfig['host']))? $databaseConfig['host']:null;
             $driver = $databaseConfig['driver'];
             $user   = $databaseConfig['user'];
             $pass   = $databaseConfig['pass'];
             $dbName = $databaseConfig['dbname']; 
-            if(empty($databaseConfig) || empty($driver) || empty($host) || empty($user) || empty($dbName)){
-                throw new \Exception("Check Database configuration at config.php",500);
+          
+            if(self::PLATFORM_DRIVER_MYSQL == $driver){
+                if(empty($databaseConfig) || empty($driver) || empty($host) || empty($user) || empty($dbName)){
+                    throw new \Exception("Check Database configuration at config.php",500);
+                }
+                self::$conn = new \PDO("$driver:host=$host;dbname=$dbName",$user,$pass);
             }
-
-            self::$conn = new \PDO("$driver:host=$host;dbname=$dbName",$user,$pass);
+            
+            if(self::PLATFORM_DRIVER_ORACLE == $driver){
+                if(empty($databaseConfig) || empty($driver) || empty($user) || empty($dbName)){
+                    throw new \Exception("Check Database configuration at config.php",500);
+                }
+                self::$conn = new \PDO("$driver:dbname=$dbName",$user,$pass);
+                
+            }
         }
         
         return static::$conn;
