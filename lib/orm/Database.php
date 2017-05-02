@@ -31,7 +31,7 @@ class Database {
     public function __get($name) {
         
         if(method_exists($this, $name)){
-            $this->$name()->get();
+            $this->$name = $this->$name()->get();
         }
     }
     
