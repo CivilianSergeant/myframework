@@ -223,6 +223,22 @@ class Database {
         }
     }
     
+    
+    
+    public function getWhere()
+    {
+        self::$select = null;
+        self::$where = new Clause($this,null,self::CLAUSE_WHERE);
+        return self::$where;
+    }
+    
+    /**
+     * Use within a model to get data by one to many relation
+     * @param string $className
+     * @param string $primaryKey
+     * @param string $foreignKey
+     * @return \Lib\ORM\Relation
+     */
     public function hasMany($className,$primaryKey,$foreignKey)
     {
         $relation = new Relation($this);
@@ -232,11 +248,13 @@ class Database {
         return $relation;
     }
     
-    public function getWhere()
+    public function hasOne($className,$primaryKey,$foreignKey)
     {
-        self::$select = null;
-        self::$where = new Clause($this,null,self::CLAUSE_WHERE);
-        return self::$where;
+        $relation = new Relation($this);
+        $relation->setClass($className);
+        $relation->setPrimaryKey($primaryKey);
+        $relation->setForeignKey($foreignKey);
+        return $relation;
     }
 
     public function __destruct() {

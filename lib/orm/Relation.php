@@ -25,6 +25,22 @@ class Relation {
         $this->context = $context;
     }
     
+    public function first()
+    {
+        $caller = new $this->class();
+        $caller->getWhere()->select("*")->where($this->foreignKey."=".$this->context->getId());
+        return $caller->first();
+    }
+
+        
+    public function get()
+    {
+        $caller = new $this->class();
+        $caller->getWhere()->select("*")->where($this->foreignKey."=".$this->context->getId());
+        return $caller->get();
+        
+    }
+    
     function setClass($class) {
         $this->class = $class;
     }
@@ -40,13 +56,10 @@ class Relation {
     function setPrimaryKey($primaryKey) {
         $this->primaryKey = $primaryKey;
     }
-
-        
-    public function get()
+    
+    public function where($sqlCommand)
     {
-        $caller = new $this->class();
-        $caller->getWhere()->select("*")->where($this->foreignKey."=".$this->context->getId());
-        return $caller->get();
-        
+        $this->context->getWhere()->where($sqlCommand);
+        return $this;
     }
 }
