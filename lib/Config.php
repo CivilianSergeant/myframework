@@ -45,7 +45,7 @@ class Config {
         $config = include 'config/config.php';
         
         if(array_key_exists('base_url', $config)){
-            if (!filter_var($param, FILTER_VALIDATE_URL, FILTER_FLAG_QUERY_REQUIRED) === false) {
+            if (!preg_match('/(https:\/\/|http:\/\/)/',$param)) {
                 return $config['base_url'] . $param;
             }
             else{

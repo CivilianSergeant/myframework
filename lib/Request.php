@@ -34,14 +34,13 @@ class Request {
    }
    
    /**
-    * Authorize user accounts and accessibility
+    * Check user session and accessibility
     */
-   public function authorize(){
-        if(self::$route != Config::get('default_login_route')){
-            if($this->isLoggedIn()){
-                $this->redirect(Config::get('default_login_route'));
-            }
+   public function isAuthorized(){
+        if($this->isLoggedIn()){
+            $this->redirect(Config::get('default_login_route'));
         }
+        
     }
    
    /**
@@ -242,7 +241,7 @@ class Request {
      */
     public function redirect($route)
     {
-        header("Location: " . $this->config->getBaseUrl("$route"));
+        header("Location: " . $this->config->getBaseUrl($route));
         exit();
     }
 
