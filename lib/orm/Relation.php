@@ -37,8 +37,10 @@ class Relation {
     public function get()
     {
         $caller = new $this->class();
-        $caller->getWhere()->select("*")->where($this->foreignKey."=".$this->context->getId())
-                ->where($this->where);
+        $caller->getWhere()->select("*")->where($this->foreignKey."=".$this->context->getId());
+        if(!empty($this->where)){
+            $caller->where($this->where);
+        }
         return $caller->get();
     }
     
