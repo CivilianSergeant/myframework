@@ -36,7 +36,7 @@ class Request {
    /**
     * Check user session and accessibility
     */
-   public function isAuthorized(){
+   public function isGuest(){
         if($this->isLoggedIn()){
             $this->redirect(Config::get('default_login_route'));
         }
