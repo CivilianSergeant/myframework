@@ -35,6 +35,16 @@ class Database {
         }
     }
     
+    public static function clear()
+    {
+        self::$where = null;
+        self::$select = null;
+        self::$sortBy = null;
+        self::$sortOrder = null;
+        static::$sqlCommand = null;
+        
+    }
+    
 
     public static function find($id)
     {
@@ -118,6 +128,7 @@ class Database {
     public static function where($sqlCommand)
     {
         $self = new static;
+        self::$select = null;
         self::$where = new Clause($self,$sqlCommand,self::CLAUSE_WHERE);
         return self::$where;
     }
@@ -130,6 +141,7 @@ class Database {
         if(empty($sqlCommand)){
             $sqlCommand = "*";
         }
+        self::$where  = null;
         self::$select = new Clause($self, $sqlCommand, self::CLAUSE_SELECT);
         return self::$select;
     }
@@ -147,6 +159,23 @@ class Database {
         return $stmt->fetch();
     }
     
+    public function delete()
+    {
+        static::$sqlCommand = "DELETE FROM ".static::table;
+        if(!empty($this->id)){
+            static::$sqlCommand .= " WHERE id=".$this->id;
+        }
+        if(self::$where){
+            static::$sqlCommand .= " WHERE ".self::$where;
+        }
+        self::$conn = Connection::getInstance();   
+        $stmt = self::$conn->query(static::$sqlCommand);
+        $stmt->execute();
+        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+        return $stmt->fetch();
+    }
+
+
     protected function prepareQuery()
     {
         if(empty(self::$select)){

@@ -147,12 +147,6 @@ class Clause {
     
     public function select($sqlCommand)
     {
-        $this->groupBy = null;
-        $this->having  = null;
-        $this->orderBy = null;
-        $this->skip    = null;
-        $this->take    = null;
-        $this->where   = null;
         $this->select = $sqlCommand;
         return $this;
     }
