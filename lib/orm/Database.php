@@ -92,13 +92,35 @@ class Database {
                 throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
             }
         }else{
+            
+            if(Connection::isOracle()){
+                self::$sqlCommand = "SELECT ".static::$sequence.".nextval as id from dual";
+                $stmt = self::$conn->query(static::$sqlCommand);
+                if(!empty($stmt)){
+                    $stmt->execute();
+                    $lastInsertId = $stmt->fetchColumn(0);
+                    if(!in_array("ID",$columnNames)){
+                        array_unshift($columnNames,"ID");
+                        array_unshift($bindWildCard, "?");
+                        array_unshift($columnValues,$lastInsertId);
+                    }
+                }else{
+                    throw new \Exception("SQL ERROR: [".$this->lastQuery()."]"); 
+                }
+            }
+            
             self::$sqlCommand = "INSERT INTO ".static::table." (".implode(",",$columnNames).") VALUES (".implode(",",$bindWildCard).")";
             
             self::$conn = Connection::getInstance();   
             $stmt = self::$conn->prepare(static::$sqlCommand);
             if(!empty($stmt)){
                 $stmt->execute($columnValues);
-                $this->id = self::$conn->lastInsertId();
+                if(Connection::isOracle()){
+                    $this->ID = $lastInsertId;
+                }else{
+                    $this->id = self::$conn->lastInsertId();
+                }
+                
                 return $this;
             }else{
                 throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
