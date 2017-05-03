@@ -99,7 +99,7 @@ class Database {
                 if(!empty($stmt)){
                     $stmt->execute();
                     $lastInsertId = $stmt->fetchColumn(0);
-                    if(!in_array("ID",$columnNames)){
+                    if(!in_array("ID",$columnNames,TRUE)){
                         array_unshift($columnNames,"ID");
                         array_unshift($bindWildCard, "?");
                         array_unshift($columnValues,$lastInsertId);
