@@ -62,6 +62,7 @@ class Database {
         
         $columnNames  = [];
         $columnValues = [];
+        $bindWildCard = [];
         
         $fields = get_object_vars($this);
         
@@ -69,19 +70,41 @@ class Database {
             if(property_exists($this, $field)){
                 if(isset($fieldVal)){
                     $columnNames[]  = "`".$field."`";
-                    $columnValues[] = "'".$fieldVal."'";
+                    $columnValues[] = $fieldVal;
+                    $bindWildCard[] = "?";
                 }
             }
         }
-        self::$sqlCommand = "INSERT INTO ".static::table." (".implode(",",$columnNames).") VALUES (".implode(",",$columnValues).")";
-        self::$conn = Connection::getInstance();   
-        $stmt = self::$conn->query(static::$sqlCommand);
-        if(!empty($stmt)){
-            $stmt->execute();
+        if(!empty($this->id)){
+            self::$sqlCommand = "UPDATE ".static::table." SET ";
+            $updateData = [];
+            foreach($columnNames as $i => $col){
+                $updateData[]  = "$col=?"; 
+            }
+            self::$sqlCommand .= implode(",",$updateData)." WHERE id=".$this->id;
+            
+            self::$conn = Connection::getInstance();   
+            $stmt = self::$conn->prepare(static::$sqlCommand);
+            if(!empty($stmt)){
+                $stmt->execute($columnValues);
+                return $stmt->rowCount();
+            }else{
+                throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
+            }
         }else{
-            throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
+            self::$sqlCommand = "INSERT INTO ".static::table." (".implode(",",$columnNames).") VALUES (".implode(",",$bindWildCard).")";
+            
+            self::$conn = Connection::getInstance();   
+            $stmt = self::$conn->prepare(static::$sqlCommand);
+            if(!empty($stmt)){
+                $stmt->execute($columnValues);
+                $this->id = self::$conn->lastInsertId();
+                return $this;
+            }else{
+                throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
+            }
         }
-        
+        return null;
     }
 
     public static function all($take=null,$skip=null,$sortBy=null,$sortOrder=null)

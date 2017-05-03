@@ -15,11 +15,12 @@ namespace Models;
  */
 class User extends \Lib\ORM\Database{
     
-    const table = "menus";
+    const table = "users";
     
     protected $id;
-    protected $name;
-    
+    protected $username;
+    protected $password;
+            
     function getId() {
         return $this->id;
     }
@@ -33,7 +34,11 @@ class User extends \Lib\ORM\Database{
     }
 
     function setName($name) {
-        $this->name = $name;
+        $this->username = $name;
+    }
+    
+    function setPassword($pass) {
+        $this->password = $pass;
     }
     
     function Pages()
