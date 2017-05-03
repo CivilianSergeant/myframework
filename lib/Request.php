@@ -37,7 +37,7 @@ class Request {
     * Check user session and accessibility
     */
    public function isGuest(){
-        if($this->isLoggedIn()){
+        if(!$this->isLoggedIn()){
             $this->redirect(Config::get('default_login_route'));
         }
         
@@ -223,13 +223,10 @@ class Request {
      */
     public function isLoggedIn()
     {
-        if(isset($_SESSION)){ 
-            if(!empty($_SESSION)){
-                return true;
-            }
-            return false;
-        }
-        else{
+        
+        if(!empty($_SESSION)){
+            return true;
+        }else{
             return false;
         }
 
