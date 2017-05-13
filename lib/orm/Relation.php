@@ -20,10 +20,12 @@ class Relation {
     protected $foreignKey;
     protected $primaryKey;
     protected $where;
+    protected $orderBy;
     
     
     public function __construct($context) {
         $this->context = $context;
+        $this->orderBy = null;
     }
     
     public function first()
@@ -37,11 +39,15 @@ class Relation {
     public function get()
     {
         $caller = new $this->class();
-        $caller->getWhere()->select("*")->where($this->foreignKey."=".$this->context->getId());
+        $clause = $caller->getWhere();
+        $clause->select("*")->where($this->foreignKey."=".$this->context->getId());
         if(!empty($this->where)){
-            $caller->where($this->where);
+            $clause->where($this->where);
         }
-        return $caller->get();
+        if(!empty($this->orderBy)){
+            $clause->orderBy($this->orderBy);
+        }
+        return $clause->get();
     }
     
     function setClass($class) {
@@ -77,6 +83,12 @@ class Relation {
         }else{
             $this->where = " $sqlCommand";
         }
+        return $this;
+    }
+    
+    public function orderBy($orderBy)
+    {
+        $this->orderBy[] = $orderBy;
         return $this;
     }
 }

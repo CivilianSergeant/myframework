@@ -82,7 +82,11 @@ class Clause {
     
     public function orderBy($orderBy)
     {
-        $this->orderBy[] = $orderBy;
+        if(is_array($orderBy)){
+            $this->orderBy = $orderBy;
+        }else{
+            $this->orderBy[] = $orderBy;
+        }
         return $this;
     }
     
