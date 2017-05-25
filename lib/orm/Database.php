@@ -79,16 +79,23 @@ class Database {
                 }
             }
         }
-        self::$conn = Connection::getInstance();   
-        if(!empty($this->id)){
+        self::$conn = Connection::getInstance();
+        
+        $id = 0;
+        if(Connection::isOracle()){
+            $id = $this->ID;
+        }
+        if(Connection::isMysql()){
+            $id = $this->id;
+        }
+        
+        if(!empty($id)){
             self::$sqlCommand = "UPDATE ".static::table." SET ";
             $updateData = [];
             foreach($columnNames as $i => $col){
                 $updateData[]  = "$col=?"; 
             }
-            self::$sqlCommand .= implode(",",$updateData)." WHERE id=".$this->id;
-            
-            self::$conn = Connection::getInstance();   
+            self::$sqlCommand .= implode(",",$updateData)." WHERE id=".$id;
             $stmt = self::$conn->prepare(static::$sqlCommand);
             if(!empty($stmt)){
                 $stmt->execute($columnValues);
