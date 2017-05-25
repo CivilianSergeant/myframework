@@ -51,7 +51,7 @@ class Connection {
     public static function isMysql(){
         $databaseConfig = Config::get('database');
         $driver = $databaseConfig[Config::get('default_driver')];
-        if($driver == self::PLATFORM_DRIVER_MYSQL){
+        if((!empty($driver)) && $driver['driver'] == self::PLATFORM_DRIVER_MYSQL){
             return true;
         }
         return false;
@@ -60,7 +60,7 @@ class Connection {
     public static function isOracle(){
         $databaseConfig = Config::get('database');
         $driver = $databaseConfig[Config::get('default_driver')];
-        if($driver == self::PLATFORM_DRIVER_ORACLE){
+        if((!empty($driver)) && $driver['driver'] == self::PLATFORM_DRIVER_ORACLE){
             return true;
         }
         return false;

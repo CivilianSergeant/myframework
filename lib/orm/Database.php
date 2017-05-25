@@ -69,12 +69,17 @@ class Database {
         foreach($fields as $field => $fieldVal){
             if(property_exists($this, $field)){
                 if(isset($fieldVal)){
-                    $columnNames[]  = "`".$field."`";
+                    if(Connection::isOracle()){
+                        $columnNames[]  = $field;
+                    }else{
+                        $columnNames[]  = "`".$field."`";
+                    }
                     $columnValues[] = $fieldVal;
                     $bindWildCard[] = "?";
                 }
             }
         }
+        self::$conn = Connection::getInstance();   
         if(!empty($this->id)){
             self::$sqlCommand = "UPDATE ".static::table." SET ";
             $updateData = [];
@@ -93,34 +98,30 @@ class Database {
             }
         }else{
             
-            if(Connection::isOracle()){
-                self::$sqlCommand = "SELECT ".static::$sequence.".nextval as id from dual";
-                $stmt = self::$conn->query(static::$sqlCommand);
-                if(!empty($stmt)){
-                    $stmt->execute();
-                    $lastInsertId = $stmt->fetchColumn(0);
-                    if(!in_array("ID",$columnNames,TRUE)){
-                        array_unshift($columnNames,"ID");
-                        array_unshift($bindWildCard, "?");
-                        array_unshift($columnValues,$lastInsertId);
-                    }
-                }else{
-                    throw new \Exception("SQL ERROR: [".$this->lastQuery()."]"); 
-                }
-            }
+//            if(Connection::isOracle()){
+//                self::$sqlCommand = "SELECT ".static::$sequence.".nextval as id from dual";
+//                $stmt = self::$conn->query(static::$sqlCommand);
+//                if(!empty($stmt)){
+//                    $stmt->execute();
+//                    $lastInsertId = $stmt->fetchColumn(0);
+//                    if(!in_array("ID",$columnNames,TRUE)){
+//                        array_unshift($columnNames,"ID");
+//                        array_unshift($bindWildCard, "?");
+//                        array_unshift($columnValues,$lastInsertId);
+//                    }
+//                }else{
+//                    throw new \Exception("SQL ERROR: [".$this->lastQuery()."]"); 
+//                }
+//            }
             
             self::$sqlCommand = "INSERT INTO ".static::table." (".implode(",",$columnNames).") VALUES (".implode(",",$bindWildCard).")";
             
-            self::$conn = Connection::getInstance();   
             $stmt = self::$conn->prepare(static::$sqlCommand);
             if(!empty($stmt)){
                 $stmt->execute($columnValues);
-                if(Connection::isOracle()){
-                    $this->ID = $lastInsertId;
-                }else{
+                if(Connection::isMysql()){
                     $this->id = self::$conn->lastInsertId();
                 }
-                
                 return $this;
             }else{
                 throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
