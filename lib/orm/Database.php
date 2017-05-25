@@ -236,23 +236,35 @@ class Database {
             
         }else{
             $select  = static::$select->getSelectClause();
-            $where   = static::$select->getWhereClause();
             $orderBy = static::$select->getOrderBy();
             $groupBy = static::$select->getGroupBy();
             $having  = static::$select->getHaving();
+            $take    = static::$select->getLimit();
+            $skip    = static::$select->getOffset();
+            if(Connection::isOracle()){
+                static::$select->where("rownum between ($skip AND $take)");    
+            }
+            $where   = static::$select->getWhereClause();
         }
         static::$sqlCommand = "SELECT ".$select." FROM ".static::table;
         
         if(!empty(self::$where)){
-            $where = static::$where->getWhereClause();
             $orderBy = static::$where->getOrderBy();
             $groupBy = static::$where->getGroupBy();
             $having  = static::$where->getHaving();
+            $take    = static::$where->getLimit();
+            $skip    = static::$where->getOffset();
+            if(Connection::isOracle()){
+                static::$where->where("rownum between ($skip AND $take)");    
+            }
+            $where = static::$where->getWhereClause();
         }
         
         if(!empty($where)){
             self::$sqlCommand .= " WHERE ".$where;
         }
+        
+        
         
         if(!empty($groupBy)){
             static::$sqlCommand .= " GROUP BY ".implode(",",$groupBy);
@@ -264,6 +276,13 @@ class Database {
         
         if(!empty($orderBy)){
             static::$sqlCommand .= " ORDER BY ".implode(",",$orderBy);
+        }
+        
+        if(Connection::isMysql()){
+            if(!empty($take)){
+                $offset = (!empty($skip))? $skip: 0;
+                static::$sqlCommand .= " LIMIT ".$offset." , ".$take;
+            }
         }
         
     }

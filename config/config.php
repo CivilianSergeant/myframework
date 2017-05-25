@@ -19,7 +19,7 @@ return [
             "host" => "localhost",
             'user' => "root",
             'pass' => "",
-            'dbname'=> "m2m_website"
+            'dbname'=> "test"
         ],
         'oracle'=> [
             "driver"=>"oci",
