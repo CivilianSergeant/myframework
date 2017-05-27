@@ -38,7 +38,7 @@ class Relation {
     public function first()
     {
         if(in_array($this->relationType,[self::oneToMany,self::belongsToMany])){
-            throw new Exception("Call get method");
+            throw new \Exception("Call get method");
         }
         
         $caller = new $this->class();
@@ -55,7 +55,7 @@ class Relation {
     public function get()
     {
         if(in_array($this->relationType,[self::oneToOne,self::belongsToOne])){
-            throw new Exception("Call first method");
+            throw new \Exception("Call first method");
         }
         
         $caller = new $this->class();
