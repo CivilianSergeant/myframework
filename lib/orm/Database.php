@@ -57,7 +57,7 @@ class Database {
         return $stmt->fetch();
     }
     
-    public static function paginate()
+    public function paginate()
     {
         $limit = static::$select->getLimit();
         $offset = static::$select->getOffset();
@@ -381,6 +381,15 @@ class Database {
     }
     
     public function hasOne($className,$primaryKey,$foreignKey)
+    {
+        $relation = new Relation($this);
+        $relation->setClass($className);
+        $relation->setPrimaryKey($primaryKey);
+        $relation->setForeignKey($foreignKey);
+        return $relation;
+    }
+    
+    public function belongsTo($className,$foreignKey,$primaryKey)
     {
         $relation = new Relation($this);
         $relation->setClass($className);

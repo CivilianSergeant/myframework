@@ -173,6 +173,11 @@ class Clause {
         return $this->context->get();
     }
     
+    public function paginate()
+    {
+        return $this->context->paginate();
+    }
+    
     public function count()
     {
         return $this->context->count();
