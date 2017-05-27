@@ -31,7 +31,13 @@ class Database {
     public function __get($name) {
         
         if(method_exists($this, $name)){
-            $this->$name = $this->$name()->get();
+            $relation = $this->$name();
+            if(in_array($relation->getRelationType(),[Relation::oneToOne,  Relation::belongsToOne])){
+                $this->$name = $relation->first();
+            }
+            if(in_array($relation->getRelationType(),[Relation::oneToMany, Relation::belongsToMany])){
+                $this->$name = $relation->get();
+            }
         }
     }
     

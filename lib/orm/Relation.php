@@ -50,8 +50,13 @@ class Relation {
         }
         return $caller->first();
     }
+    
+    public function getRelationType()
+    {
+        return $this->relationType;
+    }
 
-        
+    
     public function get()
     {
         if(in_array($this->relationType,[self::oneToOne,self::belongsToOne])){
