@@ -13,6 +13,7 @@ class Clause {
     protected $having;
     protected $orderBy;
     protected $select;
+    protected $from;
     protected $skip;
     protected $take;
     protected $where;
@@ -27,6 +28,29 @@ class Clause {
         $this->orderBy = null;
         $this->skip    = null;
         $this->take    = null;
+    }
+    
+    public function from($sqlCommand)
+    {
+        
+        if(is_callable($sqlCommand)){
+            $temp = $this->select;
+            $tempWhere = $this->where;
+            $sqlCommand($this,$temp);
+           
+            $this->from = " FROM ( SELECT ".$this->select . $this->from.")";
+            if(!empty($this->where)){
+                $this->from .= " WHERE ".$this->where;
+            }
+            
+            $this->select = "";
+            $this->select .= $temp;
+            $this->where = "";
+        }else{
+            $this->from = " FROM $sqlCommand";
+        }
+        
+        return $this;
     }
     
     
@@ -73,6 +97,11 @@ class Clause {
     public function getSelectClause()
     {
         return $this->select;
+    }
+    
+    public function getFromClause()
+    {
+        return $this->from;
     }
     
     public function getWhereClause()
@@ -142,6 +171,11 @@ class Clause {
     public function get()
     {
         return $this->context->get();
+    }
+    
+    public function count()
+    {
+        return $this->context->count();
     }
     
     public function first()

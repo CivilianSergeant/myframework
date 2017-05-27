@@ -57,6 +57,29 @@ class Database {
         return $stmt->fetch();
     }
     
+    public static function paginate()
+    {
+        $limit = static::$select->getLimit();
+        $offset = static::$select->getOffset();
+        
+        if(empty(static::$select)){
+            return null;
+        }
+        if(Connection::isOracle()){
+            return static::$select->from(function($a,$select=null)use($limit,$offset){
+                $a->select("$select, ROWNUM AS ROWNO")->from(function($b,$select=null)use($limit){
+                    $b->select($select)->from(static::table);
+                    if($limit){
+                        $b->where("ROWNUM <= $limit");
+                    }
+                })->where("ROWNO >= $offset");
+
+            })->get();
+        }
+        
+        return null;
+    }
+    
     public function save()
     {
         
@@ -215,8 +238,15 @@ class Database {
     public function delete()
     {
         static::$sqlCommand = "DELETE FROM ".static::table;
-        if(!empty($this->id)){
-            static::$sqlCommand .= " WHERE id=".$this->id;
+        $id = 0;
+        if(Connection::isOracle()){
+            $id = $this->ID;
+        }
+        if(Connection::isMysql()){
+            $id = $this->id;
+        }
+        if(!empty($id)){
+            static::$sqlCommand .= " WHERE id=".$id;
         }
         if(self::$where){
             static::$sqlCommand .= " WHERE ".self::$where;
@@ -236,17 +266,22 @@ class Database {
             
         }else{
             $select  = static::$select->getSelectClause();
+            $from    = static::$select->getFromClause();
             $orderBy = static::$select->getOrderBy();
             $groupBy = static::$select->getGroupBy();
             $having  = static::$select->getHaving();
             $take    = static::$select->getLimit();
             $skip    = static::$select->getOffset();
-            if(Connection::isOracle()){
-                static::$select->where("rownum between ($skip AND $take)");    
-            }
+            
             $where   = static::$select->getWhereClause();
         }
-        static::$sqlCommand = "SELECT ".$select." FROM ".static::table;
+        static::$sqlCommand = "SELECT ".$select;
+        
+        if(!empty($from)){
+            static::$sqlCommand .= " ".$from;
+        }else{
+            static::$sqlCommand.= " FROM ".static::table;
+        }
         
         if(!empty(self::$where)){
             $orderBy = static::$where->getOrderBy();
@@ -254,17 +289,12 @@ class Database {
             $having  = static::$where->getHaving();
             $take    = static::$where->getLimit();
             $skip    = static::$where->getOffset();
-            if(Connection::isOracle()){
-                static::$where->where("rownum between ($skip AND $take)");    
-            }
             $where = static::$where->getWhereClause();
         }
         
         if(!empty($where)){
             self::$sqlCommand .= " WHERE ".$where;
         }
-        
-        
         
         if(!empty($groupBy)){
             static::$sqlCommand .= " GROUP BY ".implode(",",$groupBy);
@@ -284,6 +314,7 @@ class Database {
                 static::$sqlCommand .= " LIMIT ".$offset." , ".$take;
             }
         }
+        
         
     }
     
