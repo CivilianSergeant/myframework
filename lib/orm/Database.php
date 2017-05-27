@@ -38,7 +38,9 @@ class Database {
             if(in_array($relation->getRelationType(),[Relation::oneToMany, Relation::belongsToMany])){
                 $this->$name = $relation->get();
             }
+            return $this->$name;
         }
+        
     }
     
     public static function clear()
