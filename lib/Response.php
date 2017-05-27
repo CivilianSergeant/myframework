@@ -43,6 +43,17 @@ class Response {
         return $this->layout;
     }
     
+    public function getRequest()
+    {
+        return $this->request;
+    }
+    
+    public function setFlashMessage($name,$message)
+    {
+        $this->request->setSessionData($name, $message);
+        return $this->layout;
+    }
+    
     /**
      * Bind data to layout object
      * @param string $key

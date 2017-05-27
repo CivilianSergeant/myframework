@@ -21,26 +21,54 @@ class Relation {
     protected $primaryKey;
     protected $where;
     protected $orderBy;
+    protected $relationType;
+    
+    const oneToOne = 1;
+    const oneToMany = 2;
+    const belongsToOne = 3;
+    const belongsToMany = 4;
     
     
-    public function __construct($context) {
+    public function __construct($context,$relationType) {
         $this->context = $context;
         $this->orderBy = null;
+        $this->relationType = $relationType;
     }
     
     public function first()
     {
+        if(in_array($this->relationType,[self::oneToMany,self::belongsToMany])){
+            throw new Exception("Call get method");
+        }
+        
         $caller = new $this->class();
-        $caller->getWhere()->select("*")->where($this->foreignKey."=".$this->context->getId());
+        $caller->getWhere()->select("*");
+        if($this->relationType == self::oneToOne){
+            $caller->where($this->foreignKey."=".$this->context->getId());
+        }else if($this->relationType == self::belongsToOne){
+            $caller->where($this->primaryKey."=".$this->context->getForeignKey());
+        }
         return $caller->first();
     }
 
         
     public function get()
     {
+        if(in_array($this->relationType,[self::oneToOne,self::belongsToOne])){
+            throw new Exception("Call first method");
+        }
+        
         $caller = new $this->class();
         $clause = $caller->getWhere();
-        $clause->select("*")->where($this->foreignKey."=".$this->context->getId());
+        
+        $clause->select("*");
+        
+        if($this->relationType == self::oneToMany){
+            $clause->where($this->foreignKey."=".$this->context->getId());
+        }else if($this->relationType == self::belongsToMany){
+            $clause->where($this->primaryKey."=".$this->context->getForeignKey());
+        }
+        
         if(!empty($this->where)){
             $clause->where($this->where);
         }

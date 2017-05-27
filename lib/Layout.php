@@ -40,7 +40,17 @@ class Layout {
     
     public function getSession($name)
     {
-        return self::$context->getSession($name);
+        $request = self::$context->getRequest();
+        $sessionData = $request->getSession($name);
+        return $sessionData;
+    }
+    
+    public function getFlashMessage($name)
+    {
+        $request = self::$context->getRequest();
+        $sessionData = $request->getSession($name);
+        $request->setSessionData($name,null);
+        return $sessionData;
     }
     
     public function add($key,$value)

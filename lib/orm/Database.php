@@ -373,7 +373,7 @@ class Database {
      */
     public function hasMany($className,$primaryKey,$foreignKey)
     {
-        $relation = new Relation($this);
+        $relation = new Relation($this,Relation::oneToMany);
         $relation->setClass($className);
         $relation->setPrimaryKey($primaryKey);
         $relation->setForeignKey($foreignKey);
@@ -382,7 +382,7 @@ class Database {
     
     public function hasOne($className,$primaryKey,$foreignKey)
     {
-        $relation = new Relation($this);
+        $relation = new Relation($this,Relation::oneToOne);
         $relation->setClass($className);
         $relation->setPrimaryKey($primaryKey);
         $relation->setForeignKey($foreignKey);
@@ -391,7 +391,16 @@ class Database {
     
     public function belongsTo($className,$foreignKey,$primaryKey)
     {
-        $relation = new Relation($this);
+        $relation = new Relation($this,Relation::belongsToOne);
+        $relation->setClass($className);
+        $relation->setPrimaryKey($primaryKey);
+        $relation->setForeignKey($foreignKey);
+        return $relation;
+    }
+    
+    public function belongsToMany($className,$foreignKey,$primaryKey)
+    {
+        $relation = new Relation($this,Relation::belongsToMany);
         $relation->setClass($className);
         $relation->setPrimaryKey($primaryKey);
         $relation->setForeignKey($foreignKey);
