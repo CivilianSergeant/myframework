@@ -18,6 +18,7 @@ class Response {
     protected static $masterViewModel;
     protected static $view;
     protected static $viewModel;
+    protected static $jsonData;
     
     public function __construct(Request $req) {
         $this->layout = new Layout($this);
@@ -84,6 +85,11 @@ class Response {
     {
         self::$view = $view;
         self::$viewModel = $data;
+    }
+
+    public function setJsonData($json)
+    {
+        self::$jsonData = json_encode($json);
     }
 
     /**
@@ -165,6 +171,11 @@ class Response {
                 }
                 include('views/'.self::$masterView.'.php');
             }
+        }
+        
+        if(!empty(self::$jsonData)){
+            header('Content-Type: application/json');
+            echo self::$jsonData;
         }
         
         
