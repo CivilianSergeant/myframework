@@ -196,8 +196,7 @@ class Request {
         if(isset($_SESSION)){
             $this->sessionData = $_SESSION;
             if(array_key_exists($name, $this->sessionData)){
-                $session = (array)$this->sessionData[$name];
-                array_shift($session);
+                $session = $this->sessionData[$name];
                 return $session;
             }
         }

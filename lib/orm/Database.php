@@ -160,12 +160,47 @@ class Database {
                 if(Connection::isMysql()){
                     $this->id = self::$conn->lastInsertId();
                 }
+                if(Connection::isOracle()){
+                    $row = self::select("MAX(ID) AS ID")->first();
+                    $this->ID = $row->ID;
+                }
                 return $this;
             }else{
                 throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
             }
         }
         return null;
+    }
+
+    public static function updateBlob($fieldName,$obj,$blobData)
+    {
+        try {
+            static::$conn = Connection::getInstance();
+            static::$conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            
+            static::clearBlob($fieldName,$obj);
+            
+            $sql = "UPDATE ".static::table." SET $fieldName = EMPTY_BLOB()  WHERE (ID = '".$obj->ID."') RETURNING $fieldName INTO :BLOB";
+            $length = strlen($blobData);
+            $stmt = static::$conn->prepare($sql);
+            $stmt->bindParam(':ID',$obj->ID);
+            $stmt->bindParam(':BLOB',$blobData, \PDO::PARAM_LOB, $length);
+           
+            static::$conn->beginTransaction();
+            $stmt->execute();
+            static::$conn->commit();
+        }catch(\Exception $e){
+            throw new \Exception($e->getMessage());
+        }
+    }
+    
+    private static function clearBlob($fieldName,$obj)
+    {
+        $sql = "UPDATE ".static::table." SET $fieldName = NULL WHERE (ID = '".$obj->ID."')";
+        $stmt = static::$conn->prepare($sql);
+        static::$conn->beginTransaction();
+        $stmt->execute();
+        static::$conn->commit();
     }
 
     public static function all($take=null,$skip=null,$sortBy=null,$sortOrder=null)
