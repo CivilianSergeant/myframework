@@ -269,7 +269,7 @@ class Database {
     {
         static::$sqlCommand = "SELECT COUNT(*) as total FROM ".static::table;
         if(self::$where){
-            static::$sqlCommand .= " WHERE ".self::$where;
+            static::$sqlCommand .= " WHERE ".self::$where->getWhereClause();
         }
         self::$conn = Connection::getInstance();   
         $stmt = self::$conn->query(static::$sqlCommand);
@@ -292,7 +292,7 @@ class Database {
             static::$sqlCommand .= " WHERE id=".$id;
         }
         if(self::$where){
-            static::$sqlCommand .= " WHERE ".self::$where;
+            static::$sqlCommand .= " WHERE ".self::$where->getWhereClause();
         }
         self::$conn = Connection::getInstance();   
         $stmt = self::$conn->query(static::$sqlCommand);
