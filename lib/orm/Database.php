@@ -96,7 +96,7 @@ class Database {
         $bindWildCard = [];
         
         $fields = get_object_vars($this);
-        
+        $isDateExist = false;
         foreach($fields as $field => $fieldVal){
             if(property_exists($this, $field)){
                 if(isset($fieldVal)){
@@ -105,8 +105,21 @@ class Database {
                     }else{
                         $columnNames[]  = "`".$field."`";
                     }
-                    $columnValues[] = $fieldVal;
+                    
+                    if(!empty($fieldVal) && !is_numeric($fieldVal) && !preg_match('/[a-zA-Z0-9]+\(/',$fieldVal)){
+                        
+                        $columnValues[] = "'$fieldVal'";
+                    }else{
+                        if(!empty($fieldVal)){
+                            $isDateExist = true;
+                            $columnValues[] =  $fieldVal;
+                        }else{
+                            $columnValues[] =  "''";
+                        }
+                        
+                    }
                     $bindWildCard[] = "?";
+                    
                 }
             }
         }
@@ -136,33 +149,46 @@ class Database {
             }
         }else{
             
-//            if(Connection::isOracle()){
-//                self::$sqlCommand = "SELECT ".static::$sequence.".nextval as id from dual";
-//                $stmt = self::$conn->query(static::$sqlCommand);
-//                if(!empty($stmt)){
-//                    $stmt->execute();
-//                    $lastInsertId = $stmt->fetchColumn(0);
-//                    if(!in_array("ID",$columnNames,TRUE)){
-//                        array_unshift($columnNames,"ID");
-//                        array_unshift($bindWildCard, "?");
-//                        array_unshift($columnValues,$lastInsertId);
-//                    }
-//                }else{
-//                    throw new \Exception("SQL ERROR: [".$this->lastQuery()."]"); 
-//                }
-//            }
+            if(Connection::isOracle()){
+                self::$sqlCommand = "SELECT ".static::sequence.".nextval as id from dual";
+                $stmt = self::$conn->prepare(static::$sqlCommand);
+                if(!empty($stmt)){
+                    $stmt->execute();
+                    $lastInsertId = $stmt->fetchColumn(0);
             
+                    if(!in_array("ID",$columnNames,TRUE)){
+                        array_unshift($columnNames,"ID");
+                        array_unshift($bindWildCard, "?");
+                        array_unshift($columnValues,$lastInsertId);
+                    }
+                }else{
+                    throw new \Exception("SQL ERROR: [".$this->lastQuery()."]"); 
+                }
+            }
+            
+           if($isDateExist){ 
+                self::$sqlCommand = "INSERT INTO ".static::table." (".implode(",",$columnNames).") VALUES (".implode(",",$columnValues).")";
+                $stmt = self::$conn->query(static::$sqlCommand);
+                
+           }else{
             self::$sqlCommand = "INSERT INTO ".static::table." (".implode(",",$columnNames).") VALUES (".implode(",",$bindWildCard).")";
+                $stmt = self::$conn->prepare(static::$sqlCommand);
+           }
             
-            $stmt = self::$conn->prepare(static::$sqlCommand);
             if(!empty($stmt)){
-                $stmt->execute($columnValues);
+                if($isDateExist){ 
+                    $stmt->execute();
+                }else{
+                    $stmt->execute($columnValues);
+                }
+                
                 if(Connection::isMysql()){
                     $this->id = self::$conn->lastInsertId();
                 }
                 if(Connection::isOracle()){
-                    $row = self::select("MAX(ID) AS ID")->first();
-                    $this->ID = $row->ID;
+                    //$row = self::select("MAX(ID) AS ID")->first();
+                    $this->ID = $lastInsertId;//self::$conn->lastInsertId(static::sequence); //$row->ID;
+                    
                 }
                 return $this;
             }else{
@@ -189,8 +215,9 @@ class Database {
             static::$conn->beginTransaction();
             $stmt->execute();
             static::$conn->commit();
+            return true;
         }catch(\Exception $e){
-            throw new \Exception($e->getMessage());
+            return false;
         }
     }
     
