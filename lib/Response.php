@@ -99,7 +99,7 @@ class Response {
     public function render()
     {
         
-        Bootstrap::init($this->request,$this);
+        
         
         if(!empty(self::$view)){
             

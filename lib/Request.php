@@ -70,7 +70,7 @@ class Request {
        if(!method_exists($controller, self::$method)){
            throw new \Exception("No Page Found, Does the method exist in the controller?",404);
        }
-       
+       Bootstrap::init($this->request,$response);
        $res = call_user_func(array($controller,self::$method), $this,$response);
        
        if(empty($res)){

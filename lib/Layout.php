@@ -57,4 +57,9 @@ class Layout {
     {
         $this->{$key} = $value;
     }
+    
+    public function get($key)
+    {
+        return $this->$key;
+    }
 }
