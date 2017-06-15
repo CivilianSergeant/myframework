@@ -98,9 +98,7 @@ class Response {
      */        
     public function render()
     {
-        
-        
-        
+
         if(!empty(self::$view)){
             
             ob_start();

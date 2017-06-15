@@ -97,6 +97,7 @@ class Database {
         
         $fields = get_object_vars($this);
         $isDateExist = false;
+        
         foreach($fields as $field => $fieldVal){
             if(property_exists($this, $field)){
                 if(isset($fieldVal)){
@@ -106,14 +107,25 @@ class Database {
                         $columnNames[]  = "`".$field."`";
                     }
                     
-                    if(!empty($fieldVal) && !is_numeric($fieldVal) && !preg_match('/[a-zA-Z0-9]+\(/',$fieldVal)){
-                        
-                        $columnValues[] = "'$fieldVal'";
+                    if(isset($fieldVal) && !preg_match('/[a-zA-Z0-9]+\(/',$fieldVal)){
+                        if(preg_match('/^[0-9]*$/',$fieldVal)){
+                        $columnValues[] = $fieldVal;
                     }else{
-                        if(!empty($fieldVal)){
+                            
+                            $columnValues[] =  "'".$fieldVal."'";
+                            
+                        }
+                    }else{
+                        if(isset($fieldVal)){
                             $isDateExist = true;
-                            $columnValues[] =  $fieldVal;
-                        }else{
+                            //if(preg_match('/^[0-9]*$/',$fieldVal) && !preg_match('/[a-zA-Z0-9]+\(/',$fieldVal)){
+                                $columnValues[] =  $fieldVal;
+                            //}else{
+                            //    $columnValues[] =  "'".$fieldVal."'";
+                            //}
+                            
+                            }else{
+                            
                             $columnValues[] =  "''";
                         }
                         
@@ -123,6 +135,7 @@ class Database {
                 }
             }
         }
+        
         self::$conn = Connection::getInstance();
         
         $id = 0;
@@ -137,18 +150,42 @@ class Database {
             self::$sqlCommand = "UPDATE ".static::table." SET ";
             $updateData = [];
             foreach($columnNames as $i => $col){
-                $updateData[]  = "$col=?"; 
+                if($isDateExist){ 
+                    $updateData[]  = "$col=".$columnValues[$i]; 
+                }else{
+                    $updateData[]  = "$col=?"; 
+                }
             }
             self::$sqlCommand .= implode(",",$updateData)." WHERE id=".$id;
-            $stmt = self::$conn->prepare(static::$sqlCommand);
+            if($isDateExist){ 
+                $stmt = self::$conn->query(static::$sqlCommand);
+            }else{
+                $stmt = self::$conn->prepare(static::$sqlCommand);
+            }
             if(!empty($stmt)){
-                $stmt->execute($columnValues);
+                if($isDateExist){ 
+                    $stmt->execute();
+                }else{
+                    foreach($columnValues as $i=>$value){
+                        $valArr = str_split($value);
+                        $valLen = strlen($value);
+
+                        $firstChar = $valArr[0];
+                        $lastChar  = $valArr[$valLen-1];
+                        if($firstChar == "'" && $lastChar == "'"){
+                            unset($valArr[0]);
+                            unset($valArr[$valLen-1]);
+                            $columnValues[$i] = implode("",$valArr);
+                        }
+                    }
+                    $stmt->execute($columnValues);
+                }
                 return $stmt->rowCount();
             }else{
                 throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
             }
         }else{
-            
+            $currentTimesTamp = time();
             if(Connection::isOracle()){
                 self::$sqlCommand = "SELECT ".static::sequence.".nextval as id from dual";
                 $stmt = self::$conn->prepare(static::$sqlCommand);
@@ -160,6 +197,14 @@ class Database {
                         array_unshift($columnNames,"ID");
                         array_unshift($bindWildCard, "?");
                         array_unshift($columnValues,$lastInsertId);
+                        array_push($columnNames,"TOKEN");
+                        array_push($bindWildCard, "?");
+                        
+                        if($isDateExist){ 
+                            array_push($columnValues,"'".md5($lastInsertId.$currentTimesTamp)."'");
+                        }else{
+                            array_push($columnValues,md5($lastInsertId.$currentTimesTamp));
+                        }
                     }
                 }else{
                     throw new \Exception("SQL ERROR: [".$this->lastQuery()."]"); 
@@ -171,6 +216,20 @@ class Database {
                 $stmt = self::$conn->query(static::$sqlCommand);
                 
            }else{
+                foreach($columnValues as $i=>$value){
+                    $valArr = str_split($value);
+                    $valLen = strlen($value);
+                    
+                    $firstChar = $valArr[0];
+                    $lastChar  = $valArr[$valLen-1];
+                    if($firstChar == "'" && $lastChar == "'"){
+                        unset($valArr[0]);
+                        unset($valArr[$valLen-1]);
+                        $columnValues[$i] = implode("",$valArr);
+                    }
+                }
+//                echo '<pre>';
+//                print_r($columnValues);die();
             self::$sqlCommand = "INSERT INTO ".static::table." (".implode(",",$columnNames).") VALUES (".implode(",",$bindWildCard).")";
                 $stmt = self::$conn->prepare(static::$sqlCommand);
            }
@@ -188,7 +247,7 @@ class Database {
                 if(Connection::isOracle()){
                     //$row = self::select("MAX(ID) AS ID")->first();
                     $this->ID = $lastInsertId;//self::$conn->lastInsertId(static::sequence); //$row->ID;
-                    
+                    $this->TOKEN = md5($lastInsertId.$currentTimesTamp);
                 }
                 return $this;
             }else{
