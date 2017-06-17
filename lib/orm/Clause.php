@@ -18,7 +18,8 @@ class Clause {
     protected $take;
     protected $where;
     
-    
+    const SELECT = 'select';
+    const WHERE  = 'where';
     
     function __construct($context,$sqlCommand,$type) {
         $this->context = $context;
@@ -28,6 +29,7 @@ class Clause {
         $this->orderBy = null;
         $this->skip    = null;
         $this->take    = null;
+        
     }
     
     public function from($sqlCommand)
@@ -186,6 +188,11 @@ class Clause {
     public function first()
     {
         return $this->context->first();
+    }
+    
+    public function last()
+    {
+        return $this->context->last();
     }
     
     public function select($sqlCommand)

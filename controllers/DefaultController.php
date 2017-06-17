@@ -20,14 +20,18 @@ class DefaultController {
 
         //$response = new Response("default",['name'=>'Himel']);
         
-        for($i=0; $i<10000; $i++){
-            $user = new User();
-            $user->name = "Himel";
-            $user->email = "mehearaz.uddin@nexdecade.com";
-            $user->address = "Khilgaon,Dhaka,Bangladesh";
-            $user->contact = "+8801714112912";
-            $user->save();
-        }
+//        for($i=0; $i<10000; $i++){
+//            $user = new User();
+//            $user->name = "Himel";
+//            $user->email = "mehearaz.uddin@nexdecade.com";
+//            $user->address = "Khilgaon,Dhaka,Bangladesh";
+//            $user->contact = "+8801714112912";
+//            $user->save();
+//        }
+        
+        $products = \Models\Product::select("id")->where("id=1")->get();
+        echo '<pre>';
+        print_r($products);
         $response->setMasterView('default', ['name'=>"Himel"]);
         $response->setSubView('index/home', ['designation'=>'Software Developer']);
         return $response;

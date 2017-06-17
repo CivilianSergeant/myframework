@@ -6,6 +6,7 @@ namespace Lib\Interfaces;
  * @author Himel
  */
 interface DatabaseInterface {
+    
     /**
      * To Save or Update Entity
      */
@@ -31,5 +32,6 @@ interface DatabaseInterface {
      */
     public function delete();
     
-   
+    
+
 }

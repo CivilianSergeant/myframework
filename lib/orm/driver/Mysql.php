@@ -8,37 +8,41 @@
 
 namespace Lib\ORM\Driver;
 use Lib\Interfaces\DatabaseInterface;
+use Lib\ORM\Clause;
 /**
  * Description of AbstractMysqlDriver
  *
  * @author Himel
  */
-class AbstractMysqlDriver implements DatabaseInterface{
+class Mysql implements DatabaseInterface{
     
     public static $connection;
     public static $sqlCommand;
     public static $select;
     public static $where;
+    public static $orderBy;
+    protected $context;
     
     
-    public function __construct($connection) {
-        self::$connection = $connection;
+    
+    public function __construct() {
+        
+        self::$connection = Connection::getInstance();
     }
     
     protected function prepareQuery()
     {
         if(empty(self::$select)){
             $select = static::$select = " * ";
-            
+           
         }else{
             $select  = static::$select->getSelectClause();
             $from    = static::$select->getFromClause();
-            $orderBy = static::$select->getOrderBy();
+            self::$orderBy = static::$select->getOrderBy();
             $groupBy = static::$select->getGroupBy();
             $having  = static::$select->getHaving();
             $take    = static::$select->getLimit();
             $skip    = static::$select->getOffset();
-            
             $where   = static::$select->getWhereClause();
         }
         static::$sqlCommand = "SELECT ".$select;
@@ -46,11 +50,11 @@ class AbstractMysqlDriver implements DatabaseInterface{
         if(!empty($from)){
             static::$sqlCommand .= " ".$from;
         }else{
-            static::$sqlCommand.= " FROM ".static::table;
+            static::$sqlCommand.= " FROM ".$this->context->getTableName();
         }
         
         if(!empty(self::$where)){
-            $orderBy = static::$where->getOrderBy();
+            self::$orderBy = static::$where->getOrderBy();
             $groupBy = static::$where->getGroupBy();
             $having  = static::$where->getHaving();
             $take    = static::$where->getLimit();
@@ -70,35 +74,30 @@ class AbstractMysqlDriver implements DatabaseInterface{
             static::$sqlCommand .= " HAVING ".$having;
         }
         
-        if(!empty($orderBy)){
-            static::$sqlCommand .= " ORDER BY ".implode(",",$orderBy);
-        }
-        
-        
-        if(!empty($take)){
-            $offset = (!empty($skip))? $skip: 0;
-            static::$sqlCommand .= " LIMIT ".$offset." , ".$take;
-        }
+//        if(!empty($orderBy)){
+//            static::$sqlCommand .= " ORDER BY ".implode(",",$orderBy);
+//        }
+//        
+//        
+//        if(!empty($take)){
+//            $offset = (!empty($skip))? $skip: 0;
+//            static::$sqlCommand .= " LIMIT ".$offset." , ".$take;
+//        }
 
     }
     
-    public static function where($sqlCommand)
-    {
-        $self = new static;
-        self::$select = null;
-        self::$where = new Clause($self,$sqlCommand,self::CLAUSE_WHERE);
-        return self::$where;
-    }
+    
     
     public function count() {
-        static::$sqlCommand = "SELECT COUNT(*) as total FROM ".static::table;
+        static::$sqlCommand = "SELECT COUNT(*) as total FROM ".$this->context->getTableName();
         if(self::$where){
             static::$sqlCommand .= " WHERE ".self::$where->getWhereClause();
         } 
         $stmt = self::$connection->query(static::$sqlCommand);
         $stmt->execute();
         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-        return $stmt->fetch();
+        $count = $stmt->fetch();
+        return (!empty($count))? $count['total'] : 0;
     }
 
     public function delete() {
@@ -119,6 +118,24 @@ class AbstractMysqlDriver implements DatabaseInterface{
 
     public function first() {
         $this->prepareQuery();
+        
+        static::$sqlCommand .= " ORDER BY ID ASC";
+        
+        $stmt = self::$connection->query(static::$sqlCommand);
+        if(!empty($stmt)){
+            $stmt->execute();
+            $stmt->setFetchMode(\PDO::FETCH_CLASS,  get_class($this));
+            return $stmt->fetch();
+        }else{
+            throw new \Exception("SQL ERROR: [".static::$sqlCommand."]");
+        }
+    }
+    
+    public function last() {
+        $this->prepareQuery();
+        
+        static::$sqlCommand .= " ORDER BY ID DESC";
+        
         $stmt = self::$connection->query(static::$sqlCommand);
         if(!empty($stmt)){
             $stmt->execute();
@@ -131,10 +148,13 @@ class AbstractMysqlDriver implements DatabaseInterface{
 
     public function get() {
         $this->prepareQuery();
+        if(!empty(self::$orderBy)){
+            static::$sqlCommand .= " ORDER BY ".implode(",",self::$orderBy);
+        }
         $stmt = self::$connection->query(static::$sqlCommand);
         if(!empty($stmt)){
             $stmt->execute();
-            $stmt->setFetchMode(\PDO::FETCH_CLASS,  get_class($this));
+            $stmt->setFetchMode(\PDO::FETCH_CLASS,  get_class($this->context));
             return $stmt->fetchAll();
         }else{
             throw new \Exception("SQL ERROR: [".static::$sqlCommand."]");
@@ -146,10 +166,9 @@ class AbstractMysqlDriver implements DatabaseInterface{
         $columnNames  = [];
         $columnValues = [];
         $bindWildCard = [];
-        
-        $fields = get_object_vars($this);
+        $fields = get_object_vars($this->context);
         foreach($fields as $field => $fieldVal){
-            if(property_exists($this, $field)){
+            if(property_exists($this->context, $field)){
                 if(isset($fieldVal)){
                     $columnNames[]  = "`".$field."`";
                     $columnValues[] = $fieldVal;
@@ -158,7 +177,7 @@ class AbstractMysqlDriver implements DatabaseInterface{
             }
         }
         
-        if(!isset($this->id)){
+        if(!isset($this->context->id)){
             return $this->create($bindWildCard, $columnNames, $columnValues);
         }else{
             return $this->update($columnNames, $columnValues);
@@ -169,12 +188,13 @@ class AbstractMysqlDriver implements DatabaseInterface{
     
     private function create($bindWildCard,$columnNames,$columnValues)
     {
-        self::$sqlCommand = "INSERT INTO ".static::table." (".implode(",",$columnNames).") VALUES (".implode(",",$bindWildCard).")"; 
-        $stmt = self::$conn->prepare(static::$sqlCommand);
+        self::$sqlCommand = "INSERT INTO ".$this->context->getTableName()." (".implode(",",$columnNames).") VALUES (".implode(",",$bindWildCard).")"; 
+        
+        $stmt = self::$connection->prepare(static::$sqlCommand);
         if(!empty($stmt)){
             $stmt->execute($columnValues);
             
-            $this->id = self::$connection->lastInsertId();
+            $this->context->id = self::$connection->lastInsertId();
             
             return $this;
         }else{
@@ -199,9 +219,20 @@ class AbstractMysqlDriver implements DatabaseInterface{
         }
     }
     
-    public function __destruct() {
-        if(self::$connection != null){
-            self::$connection = null;
+    public function setEntity($context)
+    {
+        $this->context = $context;
+    }
+    
+    public function setClause($clause,$type)
+    {
+        switch($type){
+            case Clause::SELECT:
+                    self::$select = $clause;
+                break;
+            case Clause::WHERE:
+                    self::$where  = $clause;
+                break;
         }
     }
 

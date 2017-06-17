@@ -48,6 +48,14 @@ class Connection {
         return static::$conn;
     }
     
+    public static function getDriver()
+    {
+        if(self::isMysql()){
+            $driver = new Mysql;
+        }
+        return $driver;
+    }
+    
     public static function isMysql(){
         $databaseConfig = Config::get('database');
         $driver = $databaseConfig[Config::get('default_driver')];
@@ -64,6 +72,12 @@ class Connection {
             return true;
         }
         return false;
+    }
+    
+    public static function closeConnection()
+    {
+        if(static::$conn != null)
+            static::$conn = null;
     }
     
     

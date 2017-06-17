@@ -8,6 +8,7 @@
 
 namespace Controllers;
 use Lib\Response;
+use Lib\Request;
 use Models\User;
 /**
  * Description of ServiceController
@@ -16,24 +17,16 @@ use Models\User;
  */
 class ServiceController {
     
-    public function __construct(Response $response) {
-        $response->authorise();
+    public function __construct(Request $req) {
+        
     }
 
-    public function index(Response $response)
+    public function index(Request $req, Response $response)
     {
-        
+       
         //print_r($response->getSegments());
        // return new \Lib\Response('default',['name'=>'Hello','content'=>'']);
     }
     
-    public function about(Response $response)
-    {
-        $all = User::find(1);
-        echo '<pre>';
-        print_r($all);
-        //$response->setMasterView('default', ['name'=>'about','content'=>null]);
-        return $response;
-        //return new \Lib\Response('default',['name'=>'About','content'=>'']);
-    }
+    
 }
