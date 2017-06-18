@@ -12,6 +12,8 @@ interface DatabaseInterface {
      */
     public function save();
     
+    public function saveMany($collection,$optionalData=NULL);
+    
     /**
      * Get the first item of fetched items
      */

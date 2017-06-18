@@ -28,9 +28,17 @@ class DefaultController {
 //            $user->contact = "+8801714112912";
 //            $user->save();
 //        }
+//        $product = \Models\Product::find(1);
+        $products = \Models\Product::select("id,product_name as name")->get();
         
-        $products = \Models\Product::select("id")->where("id=1")->get();
+        $order = new \Models\Order;
+        $order->invoice_id = time();
+        $order->amount = 139999.99;
+        $order->order_date = date('Y-m-d H:i:s');
+        $order->saveMany($products);
+        
         echo '<pre>';
+        
         print_r($products);
         $response->setMasterView('default', ['name'=>"Himel"]);
         $response->setSubView('index/home', ['designation'=>'Software Developer']);

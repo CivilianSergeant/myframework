@@ -16,11 +16,9 @@ class Model implements DatabaseInterface{
     protected static $where;
     protected $table;
     
-    const CLAUSE_SELECT = 'select';
-    
     public function __construct() {
         
-        static::$driver = Connection::getDriver();
+        $this->getDriver();
         static::$driver->setEntity($this);
 
     }
@@ -55,29 +53,45 @@ class Model implements DatabaseInterface{
     {
         $self = new static;
         self::$select = null;
-        self::$where = new Clause($self,$sqlCommand,self::CLAUSE_WHERE);
+        self::$where = new Clause(static::$driver,$sqlCommand,  Clause::WHERE);
+        static::$driver->setClause(static::$where,  Clause::WHERE);
         return self::$where;
+    }
+    
+    public static function find($id)
+    {
+        static::getDriver();
+        static::$driver->setEntity(new static);
+        $self = static::$driver->find($id);
+        return $self;
     }
     
     public static function select($sqlCommand=null)
     {
-        $self = new static;
-        
-//        static::$driver = Connection::getDriver();
-//        static::$driver->setEntity($self);
         
         if(empty($sqlCommand)){
             $sqlCommand = "*";
         }
-        
+        static::getDriver();
+        static::$driver->setEntity(new static);
         self::$where  = null;
-        self::$select = new Clause(static::$driver, $sqlCommand, self::CLAUSE_SELECT);
-        static::$driver->setClause(static::$select,self::CLAUSE_SELECT);
+        self::$select = new Clause(static::$driver, $sqlCommand, Clause::SELECT);
+        static::$driver->setClause(static::$select,Clause::SELECT);
         return self::$select;
     }
     
-    
-    
-    
+    private static function getDriver()
+    {
+        if(empty(static::$driver)){
+            static::$driver = Connection::getDriver ();
+        }
+    }
+
+    public function saveMany($collection,$optionalData=NULL) {
+        if(empty($collection)){
+            throw new Exception("saveMany method 1st argument cannot be empty", 400);
+        }
+        return static::$driver->saveMany($collection);
+    }
 
 }
