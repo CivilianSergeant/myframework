@@ -9,15 +9,17 @@
 namespace Lib\ORM\Driver;
 
 use Lib\Interfaces\DatabaseInterface;
+use Lib\Interfaces\RelationInterface;
 use Lib\ORM\Clause;
 use Lib\ORM\Model;
+use Lib\ORM\Relation;
 
 /**
  * Description of AbstractMysqlDriver
  *
  * @author Himel
  */
-class Mysql implements DatabaseInterface {
+class Mysql implements DatabaseInterface,  RelationInterface {
 
     protected static $connection;
     protected static $sqlCommand;
@@ -37,14 +39,18 @@ class Mysql implements DatabaseInterface {
         if (empty(self::$select)) {
             $select = static::$select = " * ";
         } else {
-            $select = static::$select->getSelectClause();
-            $from = static::$select->getFromClause();
-            $this->orderBy = static::$select->getOrderBy();
-            $groupBy = static::$select->getGroupBy();
-            $having = static::$select->getHaving();
-            $this->take = static::$select->getLimit();
-            $this->skip = static::$select->getOffset();
-            $where = static::$select->getWhereClause();
+            if(!is_string(self::$select)){
+                $select = static::$select->getSelectClause();
+                $from = static::$select->getFromClause();
+                $this->orderBy = static::$select->getOrderBy();
+                $groupBy = static::$select->getGroupBy();
+                $having = static::$select->getHaving();
+                $this->take = static::$select->getLimit();
+                $this->skip = static::$select->getOffset();
+                $where = static::$select->getWhereClause();
+            }else{
+                $select = '*';
+            }
         }
         static::$sqlCommand = "SELECT " . $select;
 
@@ -62,7 +68,7 @@ class Mysql implements DatabaseInterface {
             $this->skip = static::$where->getOffset();
             $where = static::$where->getWhereClause();
         }
-
+       
         if (!empty($where)) {
             self::$sqlCommand .= " WHERE " . $where;
         }
@@ -74,6 +80,11 @@ class Mysql implements DatabaseInterface {
         if (!empty($having)) {
             static::$sqlCommand .= " HAVING " . $having;
         }
+    }
+    
+    public function lastQuery()
+    {
+        return static::$sqlCommand;
     }
 
     protected function extractObjectMembers(Model $model, &$columnNames, &$columnValues, &$bindWildCard) {
@@ -125,7 +136,7 @@ class Mysql implements DatabaseInterface {
         $stmt = self::$connection->query(static::$sqlCommand);
         if (!empty($stmt)) {
             $stmt->execute();
-            $stmt->setFetchMode(\PDO::FETCH_CLASS, get_class($this));
+            $stmt->setFetchMode(\PDO::FETCH_CLASS, get_class($this->context));
             return $stmt->fetch();
         } else {
             throw new \Exception("SQL ERROR: [" . static::$sqlCommand . "]");
@@ -150,6 +161,9 @@ class Mysql implements DatabaseInterface {
     public function find($id) {
         static::$sqlCommand = "SELECT * FROM " . $this->context->getTableName() . " WHERE id=" . $id;
         $stmt = self::$connection->query(static::$sqlCommand);
+        if(empty($stmt)){
+            throw new \Exception("SQL ERROR: [".static::$sqlCommand."]");
+        }
         $stmt->execute();
         $stmt->setFetchMode(\PDO::FETCH_CLASS, get_class($this->context));
         return $stmt->fetch();
@@ -299,6 +313,38 @@ class Mysql implements DatabaseInterface {
                 self::$where = $clause;
                 break;
         }
+    }
+
+    public function belongsTo($modelClassName, $foreignKey, $primaryKey) {
+        $relation = new Relation($this->context,Relation::belongsToOne);
+        $relation->setClass($modelClassName);
+        $relation->setPrimaryKey($primaryKey);
+        $relation->setForeignKey($foreignKey);
+        return $relation;
+    }
+
+    public function belongsToMany($modelClassName, $foreignKey, $primaryKey) {
+        $relation = new Relation($this->context,Relation::belongsToMany);
+        $relation->setClass($modelClassName);
+        $relation->setPrimaryKey($primaryKey);
+        $relation->setForeignKey($foreignKey);
+        return $relation;
+    }
+
+    public function hasMany($modelClassName, $primaryKey, $foreignKey) {
+        $relation = new Relation($this->context,Relation::oneToMany);
+        $relation->setClass($modelClassName);
+        $relation->setPrimaryKey($primaryKey);
+        $relation->setForeignKey($foreignKey);
+        return $relation;
+    }
+
+    public function hasOne($modelClassName, $primaryKey, $foreignKey) {
+        $relation = new Relation($this->context,Relation::oneToOne);
+        $relation->setClass($modelClassName);
+        $relation->setPrimaryKey($primaryKey);
+        $relation->setForeignKey($foreignKey);
+        return $relation;
     }
 
 }

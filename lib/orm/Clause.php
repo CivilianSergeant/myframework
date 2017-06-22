@@ -21,9 +21,11 @@ class Clause {
     const SELECT = 'select';
     const WHERE  = 'where';
     
-    function __construct($context,$sqlCommand,$type) {
+    function __construct($context,$sqlCommand=null,$type=null) {
         $this->context = $context;
-        $this->{$type} = $sqlCommand;
+        if(!empty($type)){
+            $this->{$type} = $sqlCommand;
+        }
         $this->groupBy = null;
         $this->having  = null;
         $this->orderBy = null;

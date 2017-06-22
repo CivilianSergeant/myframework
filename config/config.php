@@ -15,7 +15,7 @@ return [
     'default_driver' => 'mysql',
     'database' => [
         'mysql' => [
-            "driver"=>"mysql",
+            "driver"=>"pdo_mysql",
             "host" => "localhost",
             'user' => "root",
             'pass' => "",

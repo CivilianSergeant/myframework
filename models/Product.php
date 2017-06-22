@@ -14,5 +14,15 @@ use Lib\ORM\Model;
  * @author Himel
  */
 class Product extends Model{
-    protected $table = "products";
+    private $table = "products";
+    
+    /**
+     * @var string 
+     */
+    public $id;
+    
+    public function Order()
+    {
+        return $this->belongsTo("\Models\Order", "order_id", "id");
+    }
 }

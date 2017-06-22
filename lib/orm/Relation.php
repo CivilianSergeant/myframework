@@ -41,14 +41,15 @@ class Relation {
             throw new \Exception("Call get method");
         }
         
-        $caller = new $this->class();
-        $caller->getWhere()->select("*");
+        $relationClass = new $this->class();
+        
+        $clause = $relationClass->getSelectClause();
         if($this->relationType == self::oneToOne){
-            $caller->where($this->foreignKey."=".$this->context->getId());
+            $clause->where($this->foreignKey."=".$this->context->{$this->primaryKey});
         }else if($this->relationType == self::belongsToOne){
-            $caller->where($this->primaryKey."=".$this->context->getForeignKey());
+            $clause->where($this->primaryKey."=".$this->context->{$this->foreignKey});
         }
-        return $caller->first();
+        return $clause->first();
     }
     
     public function getRelationType()
@@ -63,15 +64,14 @@ class Relation {
             throw new \Exception("Call first method");
         }
         
-        $caller = new $this->class();
-        $clause = $caller->getWhere();
+        $relationClass = new $this->class();
         
-        $clause->select("*");
+        $clause = $relationClass->getSelectClause();
         
         if($this->relationType == self::oneToMany){
-            $clause->where($this->foreignKey."=".$this->context->getId());
+            $clause->where($this->foreignKey."=".$this->context->{$this->primaryKey});
         }else if($this->relationType == self::belongsToMany){
-            $clause->where($this->primaryKey."=".$this->context->getForeignKey());
+            $clause->where($this->primaryKey."=".$this->context->{$this->foreignKey});
         }
         
         if(!empty($this->where)){

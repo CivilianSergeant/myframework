@@ -14,5 +14,12 @@ use Lib\ORM\Model;
  * @author Himel
  */
 class Order extends Model{
-    protected $table = "orders";
+    private $table = "orders";
+    
+    
+    
+    public function Products()
+    {
+        return $this->hasMany("\Models\Product", "id", "order_id");
+    }
 }
