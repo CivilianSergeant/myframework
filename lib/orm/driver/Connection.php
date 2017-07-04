@@ -10,7 +10,7 @@ use Lib\Config;
 class Connection {
     
     protected static $conn;
-    const PLATFORM_DRIVER_ORACLE = "oci";
+    const PLATFORM_DRIVER_PDO_ORACLE = "pdo_oci";
     const PLATFORM_DRIVER_PDO_MYSQL  = "pdo_mysql";
 
 
@@ -37,10 +37,11 @@ class Connection {
                 self::$conn = new \PDO("$driver:host=$host;dbname=$dbName",$user,$pass);
             }
             
-            if(self::PLATFORM_DRIVER_ORACLE == $driver){
+            if(self::PLATFORM_DRIVER_PDO_ORACLE == $driver){
                 if(empty($databaseConfig) || empty($driver) || empty($user) || empty($dbName)){
                     throw new \Exception("Check Database configuration at config.php",500);
                 }
+                $driver = (preg_match('/pdo_/',$driver))? str_replace("pdo_", "", $driver) : $driver;
                 self::$conn = new \PDO("$driver:dbname=$dbName",$user,$pass);
                 
             }
@@ -54,6 +55,9 @@ class Connection {
         if(self::isPDOMysql()){
             $driver = new Mysql;
         }
+        if(self::isPDOOracle()){
+            $driver = new PDOOracle;
+        }
         return $driver;
     }
     
@@ -66,10 +70,10 @@ class Connection {
         return false;
     }
     
-    public static function isOracle(){
+    public static function isPDOOracle(){
         $databaseConfig = Config::get('database');
         $driver = $databaseConfig[Config::get('default_driver')];
-        if((!empty($driver)) && $driver['driver'] == self::PLATFORM_DRIVER_ORACLE){
+        if((!empty($driver)) && $driver['driver'] == self::PLATFORM_DRIVER_PDO_ORACLE){
             return true;
         }
         return false;
@@ -77,8 +81,9 @@ class Connection {
     
     public static function closeConnection()
     {
-        if(static::$conn != null)
+        if(static::$conn != null){
             static::$conn = null;
+        }
     }
     
     

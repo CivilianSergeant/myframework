@@ -12,6 +12,11 @@ interface DatabaseInterface {
      */
     public function save();
     
+    /**
+     * To Save One To Many Records
+     * @param array $collection 
+     * @param array $optionalData, assoc array as optional data
+     */
     public function saveMany($collection,$optionalData=NULL);
     
     /**
