@@ -53,6 +53,14 @@ class Model implements DatabaseInterface,  RelationInterface{
         static::$driver->get();
         Connection::closeConnection();
     }
+    
+    public static function query($sqlCommand)
+    {
+        static::getDriver();
+        static::$driver->setEntity(new static);
+        return static::$driver->query($sqlCommand);
+        
+    }
 
     public function save() {
         static::$driver->save();
@@ -97,11 +105,12 @@ class Model implements DatabaseInterface,  RelationInterface{
         return self::$select;
     }
     
-    private static function getDriver()
+    public static function getDriver()
     {
         if(empty(static::$driver)){
             static::$driver = Connection::getDriver();
         }
+        return static::$driver;
     }
 
     public function saveMany($collection,$optionalData=NULL) {

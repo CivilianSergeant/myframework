@@ -4,7 +4,7 @@ namespace Lib\ORM;
 use Lib\ORM\Driver\Connection;
 /**
  * Description of Database
- *
+ * @deprecated since version 1.0.1
  * @author Himel
  */
 class Database {

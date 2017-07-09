@@ -34,7 +34,19 @@ class Mysql implements DatabaseInterface,  RelationInterface {
 
         self::$connection = Connection::getInstance();
     }
-
+    
+    public function query($sqlCommand)
+    {
+        static::$sqlCommand = $sqlCommand;
+        $stmt = self::$connection->query(static::$sqlCommand);
+        if(!empty($stmt)){
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_CLASS,  get_class($this->context));
+        }else{
+            throw new \Exception("SQL ERROR: [".$this->lastQuery()."]"); 
+        }
+    }
+    
     protected function prepareQuery() {
         if (empty(self::$select)) {
             $select = static::$select = " * ";

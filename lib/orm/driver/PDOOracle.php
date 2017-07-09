@@ -32,6 +32,18 @@ class PDOOracle implements DatabaseInterface, RelationInterface{
         self::$connection = Connection::getInstance();
     }
     
+    public function query($sqlCommand)
+    {
+        static::$sqlCommand = $sqlCommand;
+        $stmt = self::$connection->query(static::$sqlCommand);
+        if(!empty($stmt)){
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_CLASS,  get_class($this->context));
+        }else{
+            throw new \Exception("SQL ERROR: [".$this->lastQuery()."]"); 
+        }
+    }
+    
     protected function prepareQuery() {
         if (empty(self::$select)) {
             $select = static::$select = " * ";
@@ -249,12 +261,20 @@ class PDOOracle implements DatabaseInterface, RelationInterface{
             }
         }
     }
+    
+    private function getSequence()
+    {
+        $reflectionObject = new \ReflectionClass($this);
+        $property = $reflectionObject->getProperty("sequence");
+        $property->setAccessible(true);
+        return $property->getValue($this);
+    }
 
     private function create($bindWildCard,$columnNames,$columnValues,$isDateExist)
     {
         $currentTimesTamp = time();
-        self::$sqlCommand = "SELECT ".static::sequence.".nextval as id from dual";
-        $stmt = self::$conn->prepare(static::$sqlCommand);
+        self::$sqlCommand = "SELECT ".$this->getSequence().".nextval as id from dual";
+        $stmt = self::$connection->prepare(static::$sqlCommand);
         if(!empty($stmt)){
             $stmt->execute();
             $lastInsertId = $stmt->fetchColumn(0);
@@ -274,15 +294,15 @@ class PDOOracle implements DatabaseInterface, RelationInterface{
             }
             
             if($isDateExist){ 
-                self::$sqlCommand = "INSERT INTO ".static::table." (".implode(",",$columnNames).") VALUES (".implode(",",$columnValues).")";
-                $insertStmt = self::$conn->query(static::$sqlCommand);
+                self::$sqlCommand = "INSERT INTO ".$this->context->getTableName()." (".implode(",",$columnNames).") VALUES (".implode(",",$columnValues).")";
+                $insertStmt = self::$connection->query(static::$sqlCommand);
                 
             }else{
                 
                  $this->filterQuotes($columnValues);
  
-                self::$sqlCommand = "INSERT INTO ".static::table." (".implode(",",$columnNames).") VALUES (".implode(",",$bindWildCard).")";
-                $insertStmt = self::$conn->prepare(static::$sqlCommand);
+                self::$sqlCommand = "INSERT INTO ".$this->context->getTableName()." (".implode(",",$columnNames).") VALUES (".implode(",",$bindWildCard).")";
+                $insertStmt = self::$connection->prepare(static::$sqlCommand);
                 
                 if(!empty($insertStmt)){
                     if($isDateExist){ 
@@ -305,9 +325,34 @@ class PDOOracle implements DatabaseInterface, RelationInterface{
         }
     }
     
-    private function update()
+    private function update($id,$columnNames,$columnValues,$isDateExist)
     {
-        
+        self::$sqlCommand = "UPDATE ".$this->context->getTableName()." SET ";
+        $updateData = [];
+        foreach($columnNames as $i => $col){
+            if($isDateExist){ 
+                $updateData[]  = "$col=".$columnValues[$i]; 
+            }else{
+                $updateData[]  = "$col=?"; 
+            }
+        }
+        self::$sqlCommand .= implode(",",$updateData)." WHERE id=".$id;
+        if($isDateExist){ 
+            $updateStmt = self::$connection->query(static::$sqlCommand);
+        }else{
+            $updateStmt = self::$connection->prepare(static::$sqlCommand);
+        }
+        if(!empty($updateStmt)){
+            if($isDateExist){ 
+                $updateStmt->execute();
+            }else{
+                $this->filterQuotes($columnValues);
+                $updateStmt->execute($columnValues);
+            }
+            return $updateStmt->rowCount();
+        }else{
+            throw new \Exception("SQL ERROR: [".$this->lastQuery()."]");
+        }
     }
     
     public function save() {
@@ -320,7 +365,7 @@ class PDOOracle implements DatabaseInterface, RelationInterface{
         if (!isset($this->context->ID)) {
             return $this->create($bindWildCard, $columnNames, $columnValues);
         } else {
-            return $this->update($this->context->id, $columnNames, $columnValues);
+            return $this->update($this->context->ID, $columnNames, $columnValues,$isDateExist);
         }
 
         return null;
